@@ -1,4 +1,3 @@
-// src/components/editor/LanguageSelector.jsx
 import React from 'react';
 
 const LanguageSelector = ({ language, onLanguageChange }) => {

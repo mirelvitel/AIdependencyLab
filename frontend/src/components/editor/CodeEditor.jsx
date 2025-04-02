@@ -1,4 +1,3 @@
-// src/components/editor/CodeEditor.jsx
 import React, { useState } from 'react';
 import { Editor } from '@monaco-editor/react';
 import axios from 'axios';

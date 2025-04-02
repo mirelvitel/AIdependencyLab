@@ -18,7 +18,6 @@ const App = () => {
     const [testSubmitted, setTestSubmitted] = useState(false);
     const [surveySubmitted, setSurveySubmitted] = useState(false);
 
-    // Build interleaved tasks with isAIEnabled property
     useEffect(() => {
         if (hasStarted) {
             const ordered = [];
@@ -35,7 +34,6 @@ const App = () => {
         }
     }, [hasStarted]);
 
-    // Timer countdown effect.
     useEffect(() => {
         if (!hasStarted || testSubmitted) return;
         if (timeLeft <= 0) {
@@ -48,21 +46,17 @@ const App = () => {
         return () => clearInterval(timer);
     }, [timeLeft, hasStarted, testSubmitted]);
 
-    // Toggle left/right panels.
     const togglePanel = (panel) => {
         setCurrentPanel(currentPanel === panel ? null : panel);
     };
 
-    // Handle task submission.
     const handleTaskSubmit = () => {
-        // For non-final tasks, show one confirmation.
         if (currentTaskIndex < orderedTasks.length - 1) {
             const confirmed = window.confirm("Once submitted, you cannot come back to this task. Are you sure?");
             if (!confirmed) return;
             setCurrentTaskIndex(currentTaskIndex + 1);
             setCurrentPanel("task");
         } else {
-            // For the final task, confirm test submission.
             const confirmed = window.confirm("Are you sure you want to submit the test?");
             if (confirmed) {
                 handleTestSubmitAndRedirect();
@@ -70,7 +64,6 @@ const App = () => {
         }
     };
 
-    // Handle overall test submission and redirect to survey.
     const handleTestSubmitAndRedirect = () => {
         setTestSubmitted(true);
     };

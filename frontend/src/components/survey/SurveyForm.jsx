@@ -1,4 +1,3 @@
-// src/components/survey/SurveyForm.jsx
 import React, { useState } from 'react';
 
 const SurveyForm = ({ onSubmit }) => {
@@ -20,7 +19,6 @@ const SurveyForm = ({ onSubmit }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Optionally, submit the data to your backend here.
         onSubmit(formData);
     };
 

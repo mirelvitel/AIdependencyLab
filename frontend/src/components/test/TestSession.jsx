@@ -1,13 +1,10 @@
-// src/components/test/TestSession.jsx
 import React, { useState, useEffect } from 'react';
 import TaskView from './TaskView';
 import tasksWithAI from '../../tasksWithAI';
 import tasksWithoutAI from '../../tasksWithoutAI';
 
 const TestSession = ({ onFinish }) => {
-    // 1 hour = 3600 seconds
     const [timeLeft, setTimeLeft] = useState(3600);
-    // Build ordered tasks: interleaving AI-enabled and non-AI tasks.
     const orderedTasks = [];
     for (let i = 0; i < tasksWithAI.length; i++) {
         orderedTasks.push(tasksWithAI[i]);
@@ -18,10 +15,8 @@ const TestSession = ({ onFinish }) => {
     const totalTasks = orderedTasks.length;
     const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
 
-    // Timer: count down every second.
     useEffect(() => {
         if (timeLeft <= 0) {
-            // Time's up; finish the test.
             onFinish();
             return;
         }
@@ -31,22 +26,18 @@ const TestSession = ({ onFinish }) => {
         return () => clearInterval(timer);
     }, [timeLeft, onFinish]);
 
-    // Called when the user submits the current task.
     const handleTaskSubmit = () => {
         if (currentTaskIndex < totalTasks - 1) {
             setCurrentTaskIndex(currentTaskIndex + 1);
         } else {
-            // All tasks completed; finish the test.
             onFinish();
         }
     };
 
-    // Manual test submission button handler.
     const handleSubmitTest = () => {
         onFinish();
     };
 
-    // Format timer (minutes:seconds)
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
 

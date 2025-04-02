@@ -1,4 +1,3 @@
-// src/components/chat/ChatPanel.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import ChatMessage from './ChatMessage';

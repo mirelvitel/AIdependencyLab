@@ -1,4 +1,3 @@
-// src/components/tasksWithoutAI/TasksPanel.jsx
 import React from 'react';
 import tasksWithoutAI from '../../tasksWithoutAI';
 
@@ -20,18 +19,14 @@ const TasksPanel = ({ currentTaskIndex, setCurrentTaskIndex }) => {
 
     return (
         <div className="h-full p-4 bg-white overflow-y-auto shadow-md rounded-md">
-            {/* Header */}
             <h2 className="text-xl font-bold mb-2">
                 Task {currentTaskIndex + 1} of {totalTasks}
             </h2>
-            {/* Title */}
             <h3 className="text-lg font-semibold mb-2">{task.title}</h3>
-            {/* Description with newlines */}
             <p className="whitespace-pre-line">
                 {task.description}
             </p>
 
-            {/* Test Cases Section */}
             {task.testCases && task.testCases.length > 0 && (
                 <div className="bg-gray-100 p-3 mt-4 rounded border border-gray-300">
                     <h4 className="font-semibold mb-2">Test Cases:</h4>
@@ -45,7 +40,6 @@ const TasksPanel = ({ currentTaskIndex, setCurrentTaskIndex }) => {
                 </div>
             )}
 
-            {/* Navigation Buttons */}
             <div className="mt-6 flex justify-between">
                 <button
                     onClick={handlePrev}
