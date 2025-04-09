@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useState, useEffect } from 'react';
 import './index.css';
 import CodeEditor from './components/editor/CodeEditor';
@@ -11,6 +10,7 @@ import tasksWithAI from './tasksWithAI';
 
 const App = () => {
     const [hasStarted, setHasStarted] = useState(false);
+    const [session, setSession] = useState(null);
     const [currentPanel, setCurrentPanel] = useState("task");
     const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
     const [orderedTasks, setOrderedTasks] = useState([]);
@@ -92,7 +92,14 @@ const App = () => {
     const editorWidthClass = currentPanel ? "w-3/4" : "w-full";
 
     if (!hasStarted) {
-        return <IntroScreen onStart={() => setHasStarted(true)} />;
+        return (
+            <IntroScreen
+                onStart={(sessionData) => {
+                    setSession(sessionData);
+                    setHasStarted(true);
+                }}
+            />
+        );
     }
 
     return (
@@ -133,15 +140,17 @@ const App = () => {
                     <CodeEditor />
                 </div>
 
-                {currentPanel === "chat" && isChatEnabled && (
+                {isChatEnabled && session && (
                     <div className="w-1/4 border-l border-gray-300">
-                        <ChatPanel />
+                        <ChatPanel sessionId={session.sessionId} />
                     </div>
                 )}
             </main>
 
             <div
-                className={`absolute top-1/2 transform -translate-y-1/2 z-20 ${currentPanel === "task" ? "left-[25%]" : "left-0"}`}
+                className={`absolute top-1/2 transform -translate-y-1/2 z-20 ${
+                    currentPanel === "task" ? "left-[25%]" : "left-0"
+                }`}
             >
                 <button
                     onClick={() => togglePanel("task")}

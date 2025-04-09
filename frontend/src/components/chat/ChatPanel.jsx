@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import ChatMessage from './ChatMessage';
 
-const ChatPanel = () => {
+const ChatPanel = ({ sessionId }) => {
     const [messages, setMessages] = useState([
         { sender: 'assistant', text: 'Hello! How can I help you today?' }
     ]);
@@ -11,14 +11,19 @@ const ChatPanel = () => {
 
     const sendMessage = async () => {
         if (!input.trim()) return;
-        // Add user's message.
+
         const userMessage = { sender: 'user', text: input };
         setMessages((prev) => [...prev, userMessage]);
+
+        const currentInput = input;
         setInput('');
         setLoading(true);
+
         try {
-            // Call your backend endpoint that interfaces with ChatGPT.
-            const response = await axios.post('/api/chat', { message: input });
+            const response = await axios.post('/api/chat', {
+                message: currentInput,
+                sessionId: sessionId
+            });
             const replyMessage = { sender: 'assistant', text: response.data.reply };
             setMessages((prev) => [...prev, replyMessage]);
         } catch (err) {
@@ -44,7 +49,9 @@ const ChatPanel = () => {
                     className="flex-1 p-2 border border-gray-300 rounded-l"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(); }}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') sendMessage();
+                    }}
                     placeholder="Type your message..."
                 />
                 <button onClick={sendMessage} className="bg-blue-500 text-white p-2 rounded-r">
