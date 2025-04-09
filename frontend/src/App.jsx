@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './index.css';
 import CodeEditor from './components/editor/CodeEditor';
 import ChatPanel from './components/chat/ChatPanel';
@@ -41,13 +42,26 @@ const App = () => {
             return;
         }
         const timer = setInterval(() => {
-            setTimeLeft(prev => prev - 1);
+            setTimeLeft((prev) => prev - 1);
         }, 1000);
         return () => clearInterval(timer);
     }, [timeLeft, hasStarted, testSubmitted]);
 
     const togglePanel = (panel) => {
         setCurrentPanel(currentPanel === panel ? null : panel);
+    };
+
+    const handleTestSubmitAndRedirect = async () => {
+        if (session && session.sessionId) {
+            try {
+                await axios.post('/api/end-session', {
+                    sessionId: session.sessionId
+                });
+            } catch (error) {
+                console.error("Error ending session:", error);
+            }
+        }
+        setTestSubmitted(true);
     };
 
     const handleTaskSubmit = () => {
@@ -62,10 +76,6 @@ const App = () => {
                 handleTestSubmitAndRedirect();
             }
         }
-    };
-
-    const handleTestSubmitAndRedirect = () => {
-        setTestSubmitted(true);
     };
 
     if (testSubmitted && !surveySubmitted) {
@@ -108,7 +118,9 @@ const App = () => {
                 <h1 className="text-3xl font-bold">AIdependencyLab</h1>
                 <div className="flex items-center space-x-4">
                     <div className="text-lg">
-                        Time Left: {Math.floor(timeLeft / 60)}:{timeLeft % 60 < 10 ? '0' : ''}{timeLeft % 60}
+                        Time Left: {Math.floor(timeLeft / 60)}:
+                        {timeLeft % 60 < 10 ? '0' : ''}
+                        {timeLeft % 60}
                     </div>
                     <button
                         onClick={() => {

@@ -2,15 +2,13 @@ package org.example.backend.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.backend.entity.Session;
-import org.example.backend.entity.User;
-import org.example.backend.persistence.SessionRepository;
-import org.example.backend.persistence.UserRepository;
+import org.example.backend.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -18,29 +16,32 @@ import java.util.Map;
 @RequestMapping("/api")
 public class SessionController {
 
-    @Autowired
-    private UserRepository userRepository;
-
+    private final SessionService sessionService;
 
     @Autowired
-    private SessionRepository sessionRepository;
+    public SessionController(SessionService sessionService) {
+        this.sessionService = sessionService;
+    }
 
     @PostMapping("/start-session")
     public ResponseEntity<Session> startSession(@RequestBody Map<String, String> payload) {
+        String firstName = payload.get("firstName");
+        String lastName = payload.get("lastName");
+        String yearOfStudy = payload.get("yearOfStudy");
+        String codingExperience = payload.get("codingExperience");
 
-        User user = new User();
-        user.setFirstName(payload.get("firstName"));
-        user.setLastName(payload.get("lastName"));
-        user.setYearOfStudy(payload.get("yearOfStudy"));
-        user.setCodingExperience(payload.get("codingExperience"));
-        user.setCreatedAt(LocalDateTime.now());
-        userRepository.save(user);
-
-        Session session = new Session();
-        session.setUser(user);
-        session.setStartTime(LocalDateTime.now());
-        sessionRepository.save(session);
-
+        Session session = sessionService.startSession(firstName, lastName, yearOfStudy, codingExperience);
         return ResponseEntity.ok(session);
+    }
+
+    @PostMapping("/end-session")
+    public ResponseEntity<Session> endSession(@RequestBody Map<String, String> payload) {
+        Long sessionId = Long.valueOf(payload.get("sessionId"));
+        Optional<Session> sessionOpt = sessionService.endSession(sessionId);
+
+        if (sessionOpt.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(sessionOpt.get());
     }
 }
