@@ -1,4 +1,3 @@
-// src/components/chat/ChatMessage.jsx
 import React from 'react';
 import FormattedMessage from './FormattedMessage';
 

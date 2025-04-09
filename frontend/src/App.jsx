@@ -1,5 +1,5 @@
-// src/App.jsx
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './index.css';
 import CodeEditor from './components/editor/CodeEditor';
 import ChatPanel from './components/chat/ChatPanel';
@@ -11,6 +11,7 @@ import tasksWithAI from './tasksWithAI';
 
 const App = () => {
     const [hasStarted, setHasStarted] = useState(false);
+    const [session, setSession] = useState(null);
     const [currentPanel, setCurrentPanel] = useState("task");
     const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
     const [orderedTasks, setOrderedTasks] = useState([]);
@@ -18,7 +19,6 @@ const App = () => {
     const [testSubmitted, setTestSubmitted] = useState(false);
     const [surveySubmitted, setSurveySubmitted] = useState(false);
 
-    // Build interleaved tasks with isAIEnabled property
     useEffect(() => {
         if (hasStarted) {
             const ordered = [];
@@ -35,7 +35,6 @@ const App = () => {
         }
     }, [hasStarted]);
 
-    // Timer countdown effect.
     useEffect(() => {
         if (!hasStarted || testSubmitted) return;
         if (timeLeft <= 0) {
@@ -43,26 +42,35 @@ const App = () => {
             return;
         }
         const timer = setInterval(() => {
-            setTimeLeft(prev => prev - 1);
+            setTimeLeft((prev) => prev - 1);
         }, 1000);
         return () => clearInterval(timer);
     }, [timeLeft, hasStarted, testSubmitted]);
 
-    // Toggle left/right panels.
     const togglePanel = (panel) => {
         setCurrentPanel(currentPanel === panel ? null : panel);
     };
 
-    // Handle task submission.
+    const handleTestSubmitAndRedirect = async () => {
+        if (session && session.sessionId) {
+            try {
+                await axios.post('/api/end-session', {
+                    sessionId: session.sessionId
+                });
+            } catch (error) {
+                console.error("Error ending session:", error);
+            }
+        }
+        setTestSubmitted(true);
+    };
+
     const handleTaskSubmit = () => {
-        // For non-final tasks, show one confirmation.
         if (currentTaskIndex < orderedTasks.length - 1) {
             const confirmed = window.confirm("Once submitted, you cannot come back to this task. Are you sure?");
             if (!confirmed) return;
             setCurrentTaskIndex(currentTaskIndex + 1);
             setCurrentPanel("task");
         } else {
-            // For the final task, confirm test submission.
             const confirmed = window.confirm("Are you sure you want to submit the test?");
             if (confirmed) {
                 handleTestSubmitAndRedirect();
@@ -70,14 +78,10 @@ const App = () => {
         }
     };
 
-    // Handle overall test submission and redirect to survey.
-    const handleTestSubmitAndRedirect = () => {
-        setTestSubmitted(true);
-    };
-
     if (testSubmitted && !surveySubmitted) {
         return (
             <SurveyForm
+                sessionId={session.sessionId}
                 onSubmit={(data) => {
                     console.log("Survey submitted:", data);
                     setSurveySubmitted(true);
@@ -85,6 +89,7 @@ const App = () => {
             />
         );
     }
+
 
     if (surveySubmitted) {
         return (
@@ -99,7 +104,14 @@ const App = () => {
     const editorWidthClass = currentPanel ? "w-3/4" : "w-full";
 
     if (!hasStarted) {
-        return <IntroScreen onStart={() => setHasStarted(true)} />;
+        return (
+            <IntroScreen
+                onStart={(sessionData) => {
+                    setSession(sessionData);
+                    setHasStarted(true);
+                }}
+            />
+        );
     }
 
     return (
@@ -108,7 +120,9 @@ const App = () => {
                 <h1 className="text-3xl font-bold">AIdependencyLab</h1>
                 <div className="flex items-center space-x-4">
                     <div className="text-lg">
-                        Time Left: {Math.floor(timeLeft / 60)}:{timeLeft % 60 < 10 ? '0' : ''}{timeLeft % 60}
+                        Time Left: {Math.floor(timeLeft / 60)}:
+                        {timeLeft % 60 < 10 ? '0' : ''}
+                        {timeLeft % 60}
                     </div>
                     <button
                         onClick={() => {
@@ -140,15 +154,17 @@ const App = () => {
                     <CodeEditor />
                 </div>
 
-                {currentPanel === "chat" && isChatEnabled && (
+                {isChatEnabled && session && (
                     <div className="w-1/4 border-l border-gray-300">
-                        <ChatPanel />
+                        <ChatPanel sessionId={session.sessionId} />
                     </div>
                 )}
             </main>
 
             <div
-                className={`absolute top-1/2 transform -translate-y-1/2 z-20 ${currentPanel === "task" ? "left-[25%]" : "left-0"}`}
+                className={`absolute top-1/2 transform -translate-y-1/2 z-20 ${
+                    currentPanel === "task" ? "left-[25%]" : "left-0"
+                }`}
             >
                 <button
                     onClick={() => togglePanel("task")}
