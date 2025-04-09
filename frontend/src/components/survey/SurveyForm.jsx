@@ -1,120 +1,138 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
-const SurveyForm = ({ onSubmit }) => {
-    const [formData, setFormData] = useState({
-        overallImpact: '',
-        conceptualUnderstanding: '',
-        skillBalance: '',
-        confidenceChange: '',
-        independentPreparedness: '',
-        additionalFeedback: ''
+const SurveyForm = ({ sessionId, onSubmit }) => {
+    const [responses, setResponses] = useState({
+        q1: '',
+        q2: '',
+        q3: '',
+        q4: '',
+        q5: ''
     });
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        const { name, value } = e.target;
+        setResponses((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSubmit(formData);
+
+        if (!responses.q1 || !responses.q2 || !responses.q3 || !responses.q4 || !responses.q5) {
+            alert("Please complete all survey questions.");
+            return;
+        }
+
+        try {
+            await axios.post('/api/save-survey', { ...responses, sessionId });
+            onSubmit(responses);
+        } catch (error) {
+            console.error("Error saving survey:", error);
+            alert("Error saving survey responses.");
+        }
     };
 
     return (
-        <div className="max-w-xl mx-auto p-4 bg-white shadow-md rounded">
-            <h2 className="text-2xl font-bold mb-4">Survey</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label className="font-semibold block mb-1">
-                        Overall Impact: "Overall, how would you rate the impact of AI assistance on your programming learning experience?"
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <form
+                onSubmit={handleSubmit}
+                className="bg-white shadow-md p-8 w-3/4 grid grid-cols-1 gap-4 rounded"
+            >
+                <h2 className="text-2xl font-bold mb-4">Survey</h2>
+
+                <div>
+                    <label className="block font-medium mb-1">
+                        Overall, how would you rate the impact of AI assistance on your programming learning experience?
                     </label>
-                    <input
-                        type="number"
-                        name="overallImpact"
-                        value={formData.overallImpact}
+                    <select
+                        name="q1"
+                        value={responses.q1}
                         onChange={handleChange}
-                        min="1"
-                        max="5"
-                        className="w-full border border-gray-300 rounded p-2"
-                        required
-                    />
+                        className="border border-gray-300 rounded p-2 w-full"
+                    >
+                        <option value="">Select an option</option>
+                        <option value="Very Negative">1 = Very Negative</option>
+                        <option value="Negative">2 = Negative</option>
+                        <option value="Neutral">3 = Neutral</option>
+                        <option value="Positive">4 = Positive</option>
+                        <option value="Very Positive">5 = Very Positive</option>
+                    </select>
                 </div>
 
-                <div className="mb-4">
-                    <label className="font-semibold block mb-1">
-                        Conceptual Understanding: "How has AI assistance affected your understanding of fundamental programming concepts?"
+                <div>
+                    <label className="block font-medium mb-1">
+                        How has AI assistance affected your understanding of fundamental programming concepts?
                     </label>
-                    <input
-                        type="number"
-                        name="conceptualUnderstanding"
-                        value={formData.conceptualUnderstanding}
+                    <select
+                        name="q2"
+                        value={responses.q2}
                         onChange={handleChange}
-                        min="1"
-                        max="5"
-                        className="w-full border border-gray-300 rounded p-2"
-                        required
-                    />
+                        className="border border-gray-300 rounded p-2 w-full"
+                    >
+                        <option value="">Select an option</option>
+                        <option value="No Improvement">1 = No Improvement</option>
+                        <option value="Slight Improvement">2 = Slight Improvement</option>
+                        <option value="Some Improvement">3 = Some Improvement</option>
+                        <option value="Moderate Improvement">4 = Moderate Improvement</option>
+                        <option value="Significant Improvement">5 = Significant Improvement</option>
+                    </select>
                 </div>
 
-                <div className="mb-4">
-                    <label className="font-semibold block mb-1">
-                        Skill Balance: "How do you perceive the balance between using AI assistance and developing your own coding skills?"
+                <div>
+                    <label className="block font-medium mb-1">
+                        How do you perceive the balance between using AI assistance and developing your own coding skills?
                     </label>
-                    <input
-                        type="number"
-                        name="skillBalance"
-                        value={formData.skillBalance}
+                    <select
+                        name="q3"
+                        value={responses.q3}
                         onChange={handleChange}
-                        min="1"
-                        max="5"
-                        className="w-full border border-gray-300 rounded p-2"
-                        required
-                    />
+                        className="border border-gray-300 rounded p-2 w-full"
+                    >
+                        <option value="">Select an option</option>
+                        <option value="Rely Almost Entirely on AI">1 = Rely Almost Entirely on AI</option>
+                        <option value="Mostly Rely on AI">2 = Mostly Rely on AI</option>
+                        <option value="Balanced Use">3 = Balanced Use</option>
+                        <option value="Mostly Rely on My Own Skills">4 = Mostly Rely on My Own Skills</option>
+                        <option value="Use AI Very Little">5 = Use AI Very Little</option>
+                    </select>
                 </div>
 
-                <div className="mb-4">
-                    <label className="font-semibold block mb-1">
-                        Confidence Change: "Compared to before you started using AI assistance regularly, how has your confidence in your programming abilities changed?"
+                <div>
+                    <label className="block font-medium mb-1">
+                        Compared to before you started using AI assistance regularly, how has your confidence in your programming abilities changed?
                     </label>
-                    <input
-                        type="number"
-                        name="confidenceChange"
-                        value={formData.confidenceChange}
+                    <select
+                        name="q4"
+                        value={responses.q4}
                         onChange={handleChange}
-                        min="1"
-                        max="5"
-                        className="w-full border border-gray-300 rounded p-2"
-                        required
-                    />
+                        className="border border-gray-300 rounded p-2 w-full"
+                    >
+                        <option value="">Select an option</option>
+                        <option value="Much Lower Confidence">1 = Much Lower Confidence</option>
+                        <option value="Somewhat Lower">2 = Somewhat Lower</option>
+                        <option value="No Change">3 = No Change</option>
+                        <option value="Somewhat Higher">4 = Somewhat Higher</option>
+                        <option value="Much Higher">5 = Much Higher</option>
+                    </select>
                 </div>
 
-                <div className="mb-4">
-                    <label className="font-semibold block mb-1">
-                        Independent Preparedness: "If you were required to work without AI assistance, how prepared would you feel to tackle programming challenges?"
+                <div>
+                    <label className="block font-medium mb-1">
+                        If you were required to work without AI assistance, how prepared would you feel to tackle programming challenges?
                     </label>
-                    <input
-                        type="number"
-                        name="independentPreparedness"
-                        value={formData.independentPreparedness}
+                    <select
+                        name="q5"
+                        value={responses.q5}
                         onChange={handleChange}
-                        min="1"
-                        max="5"
-                        className="w-full border border-gray-300 rounded p-2"
-                        required
-                    />
-                </div>
-
-                <div className="mb-4">
-                    <label className="font-semibold block mb-1">Additional Feedback (optional):</label>
-                    <textarea
-                        name="additionalFeedback"
-                        value={formData.additionalFeedback}
-                        onChange={handleChange}
-                        className="w-full border border-gray-300 rounded p-2"
-                        rows="4"
-                    />
+                        className="border border-gray-300 rounded p-2 w-full"
+                    >
+                        <option value="">Select an option</option>
+                        <option value="Not Prepared at All">1 = Not Prepared at All</option>
+                        <option value="Slightly Prepared">2 = Slightly Prepared</option>
+                        <option value="Moderately Prepared">3 = Moderately Prepared</option>
+                        <option value="Well Prepared">4 = Well Prepared</option>
+                        <option value="Fully Prepared">5 = Fully Prepared</option>
+                    </select>
                 </div>
 
                 <button

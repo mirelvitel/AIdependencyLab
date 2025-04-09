@@ -81,6 +81,7 @@ const App = () => {
     if (testSubmitted && !surveySubmitted) {
         return (
             <SurveyForm
+                sessionId={session.sessionId}
                 onSubmit={(data) => {
                     console.log("Survey submitted:", data);
                     setSurveySubmitted(true);
@@ -88,6 +89,7 @@ const App = () => {
             />
         );
     }
+
 
     if (surveySubmitted) {
         return (
