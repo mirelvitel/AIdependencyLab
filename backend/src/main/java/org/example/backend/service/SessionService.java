@@ -20,14 +20,9 @@ public class SessionService {
         this.sessionRepository = sessionRepository;
     }
 
-    public Session startSession(String firstName,
-                                String lastName,
-                                String yearOfStudy,
-                                String codingExperience) {
+    public Session startSession(String yearOfStudy, String codingExperience) {
 
         User user = new User();
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
         user.setYearOfStudy(yearOfStudy);
         user.setCodingExperience(codingExperience);
         user.setCreatedAt(LocalDateTime.now());
