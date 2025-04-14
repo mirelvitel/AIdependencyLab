@@ -12,9 +12,14 @@ const TaskView = ({ task, onSubmit }) => {
                 <div className="bg-gray-100 p-3 mb-4 rounded border border-gray-300">
                     <h4 className="font-semibold mb-2">Test Cases:</h4>
                     <ul className="list-disc pl-5">
-                        {task.testCases.map((tc, idx) => (
-                            <li key={idx}>{tc}</li>
-                        ))}
+                        {typeof task.testCases === 'string'
+                            ? task.testCases.split('|').map((tc, idx) => (
+                                <li key={idx}>{tc}</li>
+                            ))
+                            : task.testCases.map((tc, idx) => (
+                                <li key={idx}>{tc}</li>
+                            ))
+                        }
                     </ul>
                 </div>
             )}
@@ -25,7 +30,7 @@ const TaskView = ({ task, onSubmit }) => {
 
             {task.isAIEnabled && (
                 <div className="mb-4">
-                    <ChatPanel />
+                    <ChatPanel /> {/* ChatPanel is rendered in App.jsx with exerciseId */}
                 </div>
             )}
 

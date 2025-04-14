@@ -1,8 +1,13 @@
 package org.example.backend.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "interaction")
 public class Interaction {
@@ -15,7 +20,9 @@ public class Interaction {
     private Exercise exercise;
 
     private LocalDateTime timestamp;
-    private String actionType;
+
+    @Enumerated(EnumType.STRING)
+    private InteractionType actionType;
 
     @Column(columnDefinition = "TEXT")
     private String details;

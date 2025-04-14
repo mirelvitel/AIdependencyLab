@@ -6,8 +6,6 @@ import ChatPanel from './components/chat/ChatPanel';
 import IntroScreen from './components/intro/IntroScreen';
 import TestTasksPanel from './components/test/TestTasksPanel';
 import SurveyForm from './components/survey/SurveyForm';
-import tasksWithoutAI from './tasksWithoutAI';
-import tasksWithAI from './tasksWithAI';
 
 const App = () => {
     const [hasStarted, setHasStarted] = useState(false);
@@ -15,26 +13,41 @@ const App = () => {
     const [currentPanel, setCurrentPanel] = useState("task");
     const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
     const [orderedTasks, setOrderedTasks] = useState([]);
+    const [allTasks, setAllTasks] = useState([]);
     const [timeLeft, setTimeLeft] = useState(3600); // 1 hour in seconds
     const [testSubmitted, setTestSubmitted] = useState(false);
     const [surveySubmitted, setSurveySubmitted] = useState(false);
+    const [currentExerciseId, setCurrentExerciseId] = useState(null);
 
+    // Fetch tasks from the backend on mount
     useEffect(() => {
-        if (hasStarted) {
+        axios.get('/api/tasks')
+            .then(response => {
+                setAllTasks(response.data);
+            })
+            .catch(err => console.error("Error fetching tasks:", err));
+    }, []);
+
+    // Interlace tasks with AI and without AI
+    useEffect(() => {
+        if (hasStarted && allTasks.length > 0) {
+            const tasksWithAI = allTasks.filter(task => task.isAIEnabled);
+            const tasksWithoutAI = allTasks.filter(task => !task.isAIEnabled);
             const ordered = [];
             const max = Math.max(tasksWithAI.length, tasksWithoutAI.length);
             for (let i = 0; i < max; i++) {
                 if (i < tasksWithAI.length) {
-                    ordered.push({ ...tasksWithAI[i], isAIEnabled: true });
+                    ordered.push({ ...tasksWithAI[i] });
                 }
                 if (i < tasksWithoutAI.length) {
-                    ordered.push({ ...tasksWithoutAI[i], isAIEnabled: false });
+                    ordered.push({ ...tasksWithoutAI[i] });
                 }
             }
             setOrderedTasks(ordered);
         }
-    }, [hasStarted]);
+    }, [hasStarted, allTasks]);
 
+    // Update timer
     useEffect(() => {
         if (!hasStarted || testSubmitted) return;
         if (timeLeft <= 0) {
@@ -42,10 +55,27 @@ const App = () => {
             return;
         }
         const timer = setInterval(() => {
-            setTimeLeft((prev) => prev - 1);
+            setTimeLeft(prev => prev - 1);
         }, 1000);
         return () => clearInterval(timer);
     }, [timeLeft, hasStarted, testSubmitted]);
+
+    // When current task changes, start a new Exercise by calling backend /api/exercise/start
+    useEffect(() => {
+        if (hasStarted && orderedTasks.length > 0 && session) {
+            const currentTask = orderedTasks[currentTaskIndex];
+            // Call the endpoint; assume the task id field is either id or taskId:
+            const taskId = currentTask.id || currentTask.taskId;
+            axios.post('/api/exercise/start', {
+                sessionId: session.sessionId,
+                taskId: taskId
+            })
+                .then(response => {
+                    setCurrentExerciseId(response.data.exerciseId);
+                })
+                .catch(err => console.error("Error starting exercise:", err));
+        }
+    }, [currentTaskIndex, hasStarted, orderedTasks, session]);
 
     const togglePanel = (panel) => {
         setCurrentPanel(currentPanel === panel ? null : panel);
@@ -89,7 +119,6 @@ const App = () => {
             />
         );
     }
-
 
     if (surveySubmitted) {
         return (
@@ -139,7 +168,7 @@ const App = () => {
             </header>
 
             <main className="flex flex-1 relative">
-                {currentPanel === "task" && (
+                {currentPanel === "task" && currentTask && (
                     <div className="w-1/4 border-r border-gray-300">
                         <TestTasksPanel
                             task={currentTask}
@@ -154,9 +183,9 @@ const App = () => {
                     <CodeEditor />
                 </div>
 
-                {isChatEnabled && session && (
+                {isChatEnabled && session && currentExerciseId && (
                     <div className="w-1/4 border-l border-gray-300">
-                        <ChatPanel sessionId={session.sessionId} />
+                        <ChatPanel sessionId={session.sessionId} currentExerciseId={currentExerciseId} />
                     </div>
                 )}
             </main>
