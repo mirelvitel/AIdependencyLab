@@ -26,7 +26,7 @@ public class Exercise {
 
     private Integer taskNumber;
     private Boolean completed;
-    private Integer completionTime;
+    private String completionTime;
     private Boolean success;
 
 

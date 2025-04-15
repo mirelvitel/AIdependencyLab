@@ -14,16 +14,14 @@ const App = () => {
     const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
     const [orderedTasks, setOrderedTasks] = useState([]);
     const [allTasks, setAllTasks] = useState([]);
-    const [timeLeft, setTimeLeft] = useState(3600); // 1 hour in seconds
+    const [timeLeft, setTimeLeft] = useState(3600); // 1 hour
     const [testSubmitted, setTestSubmitted] = useState(false);
     const [surveySubmitted, setSurveySubmitted] = useState(false);
     const [currentExerciseId, setCurrentExerciseId] = useState(null);
 
     useEffect(() => {
         axios.get('/api/tasks')
-            .then(response => {
-                setAllTasks(response.data);
-            })
+            .then(response => setAllTasks(response.data))
             .catch(err => console.error("Error fetching tasks:", err));
     }, []);
 
@@ -51,9 +49,7 @@ const App = () => {
             handleTestSubmitAndRedirect();
             return;
         }
-        const timer = setInterval(() => {
-            setTimeLeft(prev => prev - 1);
-        }, 1000);
+        const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
         return () => clearInterval(timer);
     }, [timeLeft, hasStarted, testSubmitted]);
 
@@ -65,23 +61,47 @@ const App = () => {
                 sessionId: session.sessionId,
                 taskId: taskId
             })
-                .then(response => {
-                    setCurrentExerciseId(response.data.exerciseId);
-                })
+                .then(response => setCurrentExerciseId(response.data.exerciseId))
                 .catch(err => console.error("Error starting exercise:", err));
         }
     }, [currentTaskIndex, hasStarted, orderedTasks, session]);
 
-    const togglePanel = (panel) => {
-        setCurrentPanel(currentPanel === panel ? null : panel);
+    const handleTaskSubmit = async () => {
+        if (currentTaskIndex < orderedTasks.length - 1) {
+            const confirmed = window.confirm("Once submitted, you cannot come back to this task. Are you sure?");
+            if (!confirmed) return;
+            try {
+                await axios.post('/api/exercise/complete', {
+                    exerciseId: currentExerciseId,
+                    completionTime: String(3600 - timeLeft),
+                    isAIEnabled: orderedTasks[currentTaskIndex].isAIEnabled
+                });
+            } catch (error) {
+                console.error("Error completing exercise:", error);
+            }
+            setCurrentTaskIndex(currentTaskIndex + 1);
+            setCurrentPanel("task");
+        } else {
+            const confirmed = window.confirm("Are you sure you want to submit the test?");
+            if (confirmed) {
+                try {
+                    await axios.post('/api/exercise/complete', {
+                        exerciseId: currentExerciseId,
+                        completionTime: String(3600 - timeLeft),
+                        isAIEnabled: orderedTasks[currentTaskIndex].isAIEnabled
+                    });
+                } catch(error) {
+                    console.error("Error completing last exercise:", error);
+                }
+                handleTestSubmitAndRedirect();
+            }
+        }
     };
 
     const handleTestSubmitAndRedirect = async () => {
         if (session && session.sessionId) {
             try {
-                await axios.post('/api/end-session', {
-                    sessionId: session.sessionId
-                });
+                await axios.post('/api/end-session', { sessionId: session.sessionId });
             } catch (error) {
                 console.error("Error ending session:", error);
             }
@@ -89,32 +109,16 @@ const App = () => {
         setTestSubmitted(true);
     };
 
-    const handleTaskSubmit = () => {
-        if (currentTaskIndex < orderedTasks.length - 1) {
-            const confirmed = window.confirm("Once submitted, you cannot come back to this task. Are you sure?");
-            if (!confirmed) return;
-            setCurrentTaskIndex(currentTaskIndex + 1);
-            setCurrentPanel("task");
-        } else {
-            const confirmed = window.confirm("Are you sure you want to submit the test?");
-            if (confirmed) {
-                handleTestSubmitAndRedirect();
-            }
-        }
-    };
+    const togglePanel = (panel) => setCurrentPanel(currentPanel === panel ? null : panel);
 
     if (testSubmitted && !surveySubmitted) {
         return (
             <SurveyForm
                 sessionId={session.sessionId}
-                onSubmit={(data) => {
-                    console.log("Survey submitted:", data);
-                    setSurveySubmitted(true);
-                }}
+                onSubmit={(data) => { console.log("Survey submitted:", data); setSurveySubmitted(true); }}
             />
         );
     }
-
     if (surveySubmitted) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -129,12 +133,7 @@ const App = () => {
 
     if (!hasStarted) {
         return (
-            <IntroScreen
-                onStart={(sessionData) => {
-                    setSession(sessionData);
-                    setHasStarted(true);
-                }}
-            />
+            <IntroScreen onStart={(sessionData) => { setSession(sessionData); setHasStarted(true); }} />
         );
     }
 
@@ -151,9 +150,7 @@ const App = () => {
                     <button
                         onClick={() => {
                             const confirmed = window.confirm("Are you sure you want to submit the test?");
-                            if (confirmed) {
-                                handleTestSubmitAndRedirect();
-                            }
+                            if (confirmed) handleTestSubmitAndRedirect();
                         }}
                         className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
                     >
@@ -185,23 +182,12 @@ const App = () => {
                 )}
             </main>
 
-            <div
-                className={`absolute top-1/2 transform -translate-y-1/2 z-20 ${
-                    currentPanel === "task" ? "left-[25%]" : "left-0"
-                }`}
-            >
+            <div className={`absolute top-1/2 transform -translate-y-1/2 z-20 ${currentPanel === "task" ? "left-[25%]" : "left-0"}`}>
                 <button
                     onClick={() => togglePanel("task")}
                     className="flex items-center bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-r focus:outline-none"
                 >
-                    {currentPanel === "task" ? (
-                        <span>&lt;</span>
-                    ) : (
-                        <>
-                            <span>Tasks</span>
-                            <span className="ml-2">&gt;</span>
-                        </>
-                    )}
+                    {currentPanel === "task" ? <span>&lt;</span> : (<><span>Tasks</span><span className="ml-2">&gt;</span></>)}
                 </button>
             </div>
 
@@ -211,14 +197,7 @@ const App = () => {
                         onClick={() => togglePanel("chat")}
                         className="flex items-center bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-l focus:outline-none"
                     >
-                        {currentPanel === "chat" ? (
-                            <span>&gt;</span>
-                        ) : (
-                            <>
-                                <span className="mr-2">&lt;</span>
-                                <span>ChatGPT</span>
-                            </>
-                        )}
+                        {currentPanel === "chat" ? <span>&gt;</span> : (<><span className="mr-2">&lt;</span><span>ChatGPT</span></>)}
                     </button>
                 </div>
             )}

@@ -70,13 +70,41 @@ public class CodeRunnerController {
                 exercise.setComplexity(ExerciseComplexity.EASY);
             }
             exercise.setCompleted(false);
-            exercise.setCompletionTime(0);
+            exercise.setCompletionTime(null);
             exercise.setSuccess(false);
 
             exercise = exerciseRepository.save(exercise);
             return ResponseEntity.ok(Map.of("exerciseId", exercise.getExerciseId()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error starting exercise");
+        }
+    }
+
+    @PostMapping("/exercise/complete")
+    public ResponseEntity<?> completeExercise(@RequestBody Map<String, String> payload) {
+        try {
+            Long exerciseId = Long.valueOf(payload.get("exerciseId"));
+            Optional<Exercise> exerciseOpt = exerciseRepository.findById(exerciseId);
+            if (exerciseOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Invalid exercise");
+            }
+            Exercise exercise = exerciseOpt.get();
+
+            if (payload.containsKey("completionTime")) {
+                int seconds = Integer.parseInt(payload.get("completionTime"));
+                String timeFormatted = String.format("%02d:%02d:%02d",
+                        seconds / 3600,
+                        (seconds % 3600) / 60,
+                        seconds % 60
+                );
+                exercise.setCompletionTime(timeFormatted);
+            }
+
+            exercise.setCompleted(true);
+            exerciseRepository.save(exercise);
+            return ResponseEntity.ok(exercise);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error completing exercise");
         }
     }
 }
