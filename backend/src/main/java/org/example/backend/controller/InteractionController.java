@@ -61,9 +61,6 @@ public class InteractionController {
             String actionTypeString = payload.get("actionType").trim();
             String details = payload.get("details");
 
-            logger.info("Logging interaction: sessionId={}, exerciseId={}, actionType={}, details={}",
-                    sessionId, exerciseId, actionTypeString, details);
-
             Interaction interaction = new Interaction();
             interaction.setExercise(exercise);
             interaction.setActionType(InteractionType.valueOf(actionTypeString));

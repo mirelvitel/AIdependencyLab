@@ -50,7 +50,7 @@ public class CodeRunnerController {
     public ResponseEntity<?> startExercise(@RequestBody Map<String, String> payload) {
         try {
             Long sessionId = Long.valueOf(payload.get("sessionId"));
-            Long taskId = Long.valueOf(payload.get("taskId")); // this id comes from the TaskRepository
+            Long taskId = Long.valueOf(payload.get("taskId"));
             Optional<Session> sessionOpt = sessionRepository.findById(sessionId);
             if (sessionOpt.isEmpty()) {
                 return ResponseEntity.badRequest().body("Invalid session");

@@ -19,7 +19,6 @@ const App = () => {
     const [surveySubmitted, setSurveySubmitted] = useState(false);
     const [currentExerciseId, setCurrentExerciseId] = useState(null);
 
-    // Fetch tasks from the backend on mount
     useEffect(() => {
         axios.get('/api/tasks')
             .then(response => {
@@ -28,7 +27,6 @@ const App = () => {
             .catch(err => console.error("Error fetching tasks:", err));
     }, []);
 
-    // Interlace tasks with AI and without AI
     useEffect(() => {
         if (hasStarted && allTasks.length > 0) {
             const tasksWithAI = allTasks.filter(task => task.isAIEnabled);
@@ -47,7 +45,6 @@ const App = () => {
         }
     }, [hasStarted, allTasks]);
 
-    // Update timer
     useEffect(() => {
         if (!hasStarted || testSubmitted) return;
         if (timeLeft <= 0) {
@@ -60,11 +57,9 @@ const App = () => {
         return () => clearInterval(timer);
     }, [timeLeft, hasStarted, testSubmitted]);
 
-    // When current task changes, start a new Exercise by calling backend /api/exercise/start
     useEffect(() => {
         if (hasStarted && orderedTasks.length > 0 && session) {
             const currentTask = orderedTasks[currentTaskIndex];
-            // Call the endpoint; assume the task id field is either id or taskId:
             const taskId = currentTask.id || currentTask.taskId;
             axios.post('/api/exercise/start', {
                 sessionId: session.sessionId,

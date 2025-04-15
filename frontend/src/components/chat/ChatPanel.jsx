@@ -11,14 +11,13 @@ const ChatPanel = ({ sessionId, currentExerciseId }) => {
     const [selectedAction, setSelectedAction] = useState(null);
 
     const actionTypes = [
-        { label: "Generate Code", value: "AI_CODE_GENERATION" },
-        { label: "Debug Code", value: "AI_DEBUG" },
-        { label: "Explain Theory", value: "AI_THEORY_EXPLANATION" },
-        { label: "General Query", value: "AI_GENERAL_QUERY" }
+        { label: "Code", value: "AI_CODE_GENERATION" },
+        { label: "Debug", value: "AI_DEBUG" },
+        { label: "Theory", value: "AI_THEORY_EXPLANATION" },
+        { label: "Query", value: "AI_GENERAL_QUERY" }
     ];
 
     const logInteraction = async (actionType, details) => {
-        console.log("Logging interaction:", { sessionId, currentExerciseId, actionType, details });
         try {
             await axios.post('/api/log-interaction', {
                 sessionId: sessionId,
@@ -52,7 +51,6 @@ const ChatPanel = ({ sessionId, currentExerciseId }) => {
             });
             const replyMessage = { sender: 'assistant', text: response.data.reply };
             setMessages((prev) => [...prev, replyMessage]);
-
             await logInteraction(selectedAction, response.data.reply);
         } catch (err) {
             const errorMessage = {
@@ -63,34 +61,31 @@ const ChatPanel = ({ sessionId, currentExerciseId }) => {
             await logInteraction(selectedAction, errorMessage.text);
         }
         setLoading(false);
+        setSelectedAction(null);
     };
 
     return (
         <div className="flex flex-col h-full bg-white p-4 border-l border-gray-300">
-            {!selectedAction && (
-                <div className="mb-4">
-                    <p className="mb-2 font-semibold">Select query type:</p>
-                    <div className="flex gap-2">
-                        {actionTypes.map((action) => (
-                            <button
-                                key={action.value}
-                                onClick={() => setSelectedAction(action.value)}
-                                className={`px-3 py-1 border rounded ${
-                                    selectedAction === action.value
-                                        ? "bg-blue-500 text-white"
-                                        : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                                }`}
-                            >
-                                {action.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
-
             <div className="flex-1 overflow-y-auto mb-4">
                 {messages.map((msg, index) => (
                     <ChatMessage key={index} sender={msg.sender} text={msg.text} />
+                ))}
+            </div>
+
+            <div className="text-red-600 mb-1">*Please select the type of request you want to make:</div>
+            <div className="flex items-center space-x-2 mb-1">
+                {actionTypes.map((action) => (
+                    <button
+                        key={action.value}
+                        onClick={() => setSelectedAction(action.value)}
+                        className={`px-2 py-1 text-xs border rounded ${
+                            selectedAction === action.value
+                                ? "bg-blue-500 text-white"
+                                : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                        }`}
+                    >
+                        {action.label}
+                    </button>
                 ))}
             </div>
 
@@ -100,10 +95,8 @@ const ChatPanel = ({ sessionId, currentExerciseId }) => {
                     className="flex-1 p-2 border border-gray-300 rounded-l"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') sendMessage();
-                    }}
-                    placeholder={selectedAction ? "Type your message..." : "Select a query type above to enable chat"}
+                    onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(); }}
+                    placeholder="Type your message..."
                     disabled={!selectedAction}
                 />
                 <button
