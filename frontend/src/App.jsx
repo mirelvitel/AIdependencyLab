@@ -138,7 +138,7 @@ const App = () => {
     }
 
     return (
-        <div className="App bg-gray-100 min-h-screen flex flex-col relative">
+        <div className="App bg-gray-100 min-h-screen flex flex-col">
             <header className="bg-gray-600 text-white py-4 shadow-md flex justify-between items-center px-4">
                 <h1 className="text-3xl font-bold">AIdependencyLab</h1>
                 <div className="flex items-center space-x-4">
@@ -161,7 +161,7 @@ const App = () => {
 
             <main className="flex flex-1 relative">
                 {currentPanel === "task" && currentTask && (
-                    <div className="w-1/4 border-r border-gray-300">
+                    <div className="w-1/4 border-r border-gray-300 transition-all duration-300">
                         <TestTasksPanel
                             task={currentTask}
                             currentTaskIndex={currentTaskIndex}
@@ -171,42 +171,53 @@ const App = () => {
                     </div>
                 )}
 
-                <div className={editorWidthClass}>
+                <div className={`${editorWidthClass} transition-all duration-300`}>
                     <CodeEditor />
                 </div>
 
                 {isChatEnabled && session && currentExerciseId && (
-                    <div className="w-1/4 border-l border-gray-300">
+                    <div className={`${currentPanel === "chat" ? "block" : "hidden"} w-1/4 border-l border-gray-300 transition-all duration-300`}>
                         <ChatPanel sessionId={session.sessionId} currentExerciseId={currentExerciseId} />
                     </div>
                 )}
-            </main>
 
-            <div className={`absolute top-1/2 transform -translate-y-1/2 z-20 ${currentPanel === "task" ? "left-[25%]" : "left-0"}`}>
-                <button
-                    onClick={() => togglePanel("task")}
-                    className="flex items-center bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-r focus:outline-none"
+                {/* Tasks toggle */}
+                <div
+                    className={`absolute top-1/2 transform -translate-y-1/2 z-20 ${currentPanel === "task" ? "left-[25%]" : "left-0"}`}
                 >
-                    {currentPanel === "task" ? <span>&lt;</span> : (<><span>Tasks</span><span className="ml-2">&gt;</span></>)}
-                </button>
-            </div>
-
-            {isChatEnabled && (
-                <div className="absolute right-0 top-1/2 transform -translate-y-1/2 z-20">
                     <button
-                        onClick={() => togglePanel("chat")}
-                        className="flex items-center bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-l focus:outline-none"
+                        onClick={() => togglePanel("task")}
+                        className="flex items-center bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-r focus:outline-none"
                     >
-                        {currentPanel === "chat" ? <span>&gt;</span> : (<><span className="mr-2">&lt;</span><span>ChatGPT</span></>)}
+                        {currentPanel === "task"
+                            ? <span>&lt;</span>
+                            : <><span>Tasks</span><span className="ml-2">&gt;</span></>
+                        }
                     </button>
                 </div>
-            )}
+
+                {/* Chat toggle */}
+                {isChatEnabled && (
+                    <div className="absolute top-1/2 right-0 transform -translate-y-1/2 z-20">
+                        <button
+                            onClick={() => togglePanel("chat")}
+                            className="flex items-center bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-l focus:outline-none"
+                        >
+                            {currentPanel === "chat"
+                                ? <span>&gt;</span>
+                                : <><span className="mr-2">&lt;</span><span>ChatGPT</span></>
+                            }
+                        </button>
+                    </div>
+                )}
+            </main>
 
             <footer className="text-center text-gray-600 py-4">
                 &copy; {new Date().getFullYear()} AIdependencyLab
             </footer>
         </div>
     );
+
 };
 
 export default App;

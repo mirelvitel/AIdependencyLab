@@ -11,10 +11,10 @@ const ChatPanel = ({ sessionId, currentExerciseId }) => {
     const [selectedAction, setSelectedAction] = useState(null);
 
     const actionTypes = [
-        { label: "Code", value: "AI_CODE_GENERATION" },
+        { label: "Code Generation", value: "AI_CODE_GENERATION" },
         { label: "Debug", value: "AI_DEBUG" },
         { label: "Theory", value: "AI_THEORY_EXPLANATION" },
-        { label: "Query", value: "AI_GENERAL_QUERY" }
+        { label: "General Query", value: "AI_GENERAL_QUERY" }
     ];
 
     const logInteraction = async (actionType, details) => {
