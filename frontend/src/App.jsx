@@ -14,7 +14,7 @@ const App = () => {
     const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
     const [orderedTasks, setOrderedTasks] = useState([]);
     const [allTasks, setAllTasks] = useState([]);
-    const [timeLeft, setTimeLeft] = useState(3600); // 1 hour
+    const [timeLeft, setTimeLeft] = useState(3600)
     const [testSubmitted, setTestSubmitted] = useState(false);
     const [surveySubmitted, setSurveySubmitted] = useState(false);
     const [currentExerciseId, setCurrentExerciseId] = useState(null);

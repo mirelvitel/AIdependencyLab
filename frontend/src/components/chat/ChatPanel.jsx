@@ -72,7 +72,9 @@ const ChatPanel = ({ sessionId, currentExerciseId }) => {
                 ))}
             </div>
 
-            <div className="text-red-600 mb-1">*Please select the type of request you want to make:</div>
+            {!selectedAction && (
+                <div className="text-red-600 mb-1">*Please select the type of request you want to make:</div>
+            )}
             <div className="flex items-center space-x-2 mb-1">
                 {actionTypes.map((action) => (
                     <button

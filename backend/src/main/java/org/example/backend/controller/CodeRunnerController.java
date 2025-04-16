@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -50,33 +49,34 @@ public class CodeRunnerController {
     public ResponseEntity<?> startExercise(@RequestBody Map<String, String> payload) {
         try {
             Long sessionId = Long.valueOf(payload.get("sessionId"));
-            Long taskId = Long.valueOf(payload.get("taskId"));
-            Optional<Session> sessionOpt = sessionRepository.findById(sessionId);
-            if (sessionOpt.isEmpty()) {
-                return ResponseEntity.badRequest().body("Invalid session");
-            }
-            Optional<Task> taskOpt = taskRepository.findById(taskId);
-            if (taskOpt.isEmpty()) {
-                return ResponseEntity.badRequest().body("Invalid task");
-            }
-            Task task = taskOpt.get();
+            Long taskId    = Long.valueOf(payload.get("taskId"));
+
+            Session session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid session"));
+
+            Task task = taskRepository.findById(taskId)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid task"));
 
             Exercise exercise = new Exercise();
-            exercise.setSession(sessionOpt.get());
-            exercise.setTaskNumber(task.getTaskId().intValue());
+            exercise.setSession(session);
+            exercise.setTask(task);
+            exercise.setIsAiEnabled(task.getIsAIEnabled());
             try {
-                exercise.setComplexity(ExerciseComplexity.valueOf(task.getComplexity().toUpperCase()));
-            } catch (IllegalArgumentException e) {
+                exercise.setComplexity(
+                        ExerciseComplexity.valueOf(task.getComplexity().toUpperCase())
+                );
+            } catch (IllegalArgumentException ex) {
                 exercise.setComplexity(ExerciseComplexity.EASY);
             }
             exercise.setCompleted(false);
-            exercise.setCompletionTime(null);
-            exercise.setSuccess(false);
 
             exercise = exerciseRepository.save(exercise);
             return ResponseEntity.ok(Map.of("exerciseId", exercise.getExerciseId()));
+        } catch (IllegalArgumentException iae) {
+            return ResponseEntity.badRequest().body(iae.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error starting exercise");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error starting exercise");
         }
     }
 
@@ -84,27 +84,28 @@ public class CodeRunnerController {
     public ResponseEntity<?> completeExercise(@RequestBody Map<String, String> payload) {
         try {
             Long exerciseId = Long.valueOf(payload.get("exerciseId"));
-            Optional<Exercise> exerciseOpt = exerciseRepository.findById(exerciseId);
-            if (exerciseOpt.isEmpty()) {
-                return ResponseEntity.badRequest().body("Invalid exercise");
-            }
-            Exercise exercise = exerciseOpt.get();
+            Exercise exercise = exerciseRepository.findById(exerciseId)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid exercise"));
 
             if (payload.containsKey("completionTime")) {
                 int seconds = Integer.parseInt(payload.get("completionTime"));
-                String timeFormatted = String.format("%02d:%02d:%02d",
+                String formatted = String.format("%02d:%02d:%02d",
                         seconds / 3600,
                         (seconds % 3600) / 60,
                         seconds % 60
                 );
-                exercise.setCompletionTime(timeFormatted);
+                exercise.setCompletionTime(formatted);
             }
 
             exercise.setCompleted(true);
+
             exerciseRepository.save(exercise);
             return ResponseEntity.ok(exercise);
+        } catch (IllegalArgumentException iae) {
+            return ResponseEntity.badRequest().body(iae.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error completing exercise");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error completing exercise");
         }
     }
 }

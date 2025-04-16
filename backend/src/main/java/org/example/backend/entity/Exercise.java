@@ -24,11 +24,14 @@ public class Exercise {
     @Enumerated(EnumType.STRING)
     private ExerciseComplexity complexity;
 
-    private Integer taskNumber;
+    @ManyToOne
+    @JoinColumn(name = "task_id")
+    private Task task;
+
+    private Boolean isAiEnabled;
     private Boolean completed;
     private String completionTime;
     private Boolean success;
-
 
     public Exercise() {
 
