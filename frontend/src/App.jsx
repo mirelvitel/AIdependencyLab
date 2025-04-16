@@ -14,7 +14,7 @@ const App = () => {
     const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
     const [orderedTasks, setOrderedTasks] = useState([]);
     const [allTasks, setAllTasks] = useState([]);
-    const [timeLeft, setTimeLeft] = useState(3600)
+    const [timeLeft, setTimeLeft] = useState(3600);
     const [testSubmitted, setTestSubmitted] = useState(false);
     const [surveySubmitted, setSurveySubmitted] = useState(false);
     const [currentExerciseId, setCurrentExerciseId] = useState(null);
@@ -27,17 +27,13 @@ const App = () => {
 
     useEffect(() => {
         if (hasStarted && allTasks.length > 0) {
-            const tasksWithAI = allTasks.filter(task => task.isAIEnabled);
-            const tasksWithoutAI = allTasks.filter(task => !task.isAIEnabled);
+            const tasksWithAI = allTasks.filter(t => t.isAIEnabled);
+            const tasksWithoutAI = allTasks.filter(t => !t.isAIEnabled);
             const ordered = [];
             const max = Math.max(tasksWithAI.length, tasksWithoutAI.length);
             for (let i = 0; i < max; i++) {
-                if (i < tasksWithAI.length) {
-                    ordered.push({ ...tasksWithAI[i] });
-                }
-                if (i < tasksWithoutAI.length) {
-                    ordered.push({ ...tasksWithoutAI[i] });
-                }
+                if (i < tasksWithAI.length) ordered.push({ ...tasksWithAI[i] });
+                if (i < tasksWithoutAI.length) ordered.push({ ...tasksWithoutAI[i] });
             }
             setOrderedTasks(ordered);
         }
@@ -67,39 +63,30 @@ const App = () => {
     }, [currentTaskIndex, hasStarted, orderedTasks, session]);
 
     const handleTaskSubmit = async () => {
-        if (currentTaskIndex < orderedTasks.length - 1) {
-            const confirmed = window.confirm("Once submitted, you cannot come back to this task. Are you sure?");
-            if (!confirmed) return;
-            try {
-                await axios.post('/api/exercise/complete', {
-                    exerciseId: currentExerciseId,
-                    completionTime: String(3600 - timeLeft),
-                    isAIEnabled: orderedTasks[currentTaskIndex].isAIEnabled
-                });
-            } catch (error) {
-                console.error("Error completing exercise:", error);
-            }
-            setCurrentTaskIndex(currentTaskIndex + 1);
-            setCurrentPanel("task");
+        const isLast = currentTaskIndex === orderedTasks.length - 1;
+        const confirmMsg = isLast
+            ? "Are you sure you want to submit the test?"
+            : "Once submitted, you cannot come back to this task. Are you sure?";
+        if (!window.confirm(confirmMsg)) return;
+        try {
+            await axios.post('/api/exercise/complete', {
+                exerciseId: currentExerciseId,
+                completionTime: String(3600 - timeLeft),
+                isAIEnabled: orderedTasks[currentTaskIndex].isAIEnabled
+            });
+        } catch (error) {
+            console.error("Error completing exercise:", error);
+        }
+        if (isLast) {
+            handleTestSubmitAndRedirect();
         } else {
-            const confirmed = window.confirm("Are you sure you want to submit the test?");
-            if (confirmed) {
-                try {
-                    await axios.post('/api/exercise/complete', {
-                        exerciseId: currentExerciseId,
-                        completionTime: String(3600 - timeLeft),
-                        isAIEnabled: orderedTasks[currentTaskIndex].isAIEnabled
-                    });
-                } catch(error) {
-                    console.error("Error completing last exercise:", error);
-                }
-                handleTestSubmitAndRedirect();
-            }
+            setCurrentTaskIndex(idx => idx + 1);
+            setCurrentPanel("task");
         }
     };
 
     const handleTestSubmitAndRedirect = async () => {
-        if (session && session.sessionId) {
+        if (session?.sessionId) {
             try {
                 await axios.post('/api/end-session', { sessionId: session.sessionId });
             } catch (error) {
@@ -109,49 +96,47 @@ const App = () => {
         setTestSubmitted(true);
     };
 
-    const togglePanel = (panel) => setCurrentPanel(currentPanel === panel ? null : panel);
+    const togglePanel = panel =>
+        setCurrentPanel(cur => (cur === panel ? null : panel));
 
     if (testSubmitted && !surveySubmitted) {
         return (
             <SurveyForm
                 sessionId={session.sessionId}
-                onSubmit={(data) => { console.log("Survey submitted:", data); setSurveySubmitted(true); }}
+                onSubmit={() => setSurveySubmitted(true)}
             />
         );
     }
     if (surveySubmitted) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="flex items-center justify-center h-full">
                 <h2 className="text-2xl font-bold">Thank you for your participation!</h2>
             </div>
         );
     }
 
     const currentTask = orderedTasks[currentTaskIndex];
-    const isChatEnabled = currentTask && currentTask.isAIEnabled;
+    const isChatEnabled = currentTask?.isAIEnabled;
     const editorWidthClass = currentPanel ? "w-3/4" : "w-full";
 
     if (!hasStarted) {
-        return (
-            <IntroScreen onStart={(sessionData) => { setSession(sessionData); setHasStarted(true); }} />
-        );
+        return <IntroScreen onStart={data => { setSession(data); setHasStarted(true); }} />;
     }
 
     return (
-        <div className="App bg-gray-100 min-h-screen flex flex-col">
+        <div className="App bg-gray-100 h-full flex flex-col overflow-hidden">
             <header className="bg-gray-600 text-white py-4 shadow-md flex justify-between items-center px-4">
                 <h1 className="text-3xl font-bold">AIdependencyLab</h1>
                 <div className="flex items-center space-x-4">
                     <div className="text-lg">
-                        Time Left: {Math.floor(timeLeft / 60)}:
-                        {timeLeft % 60 < 10 ? '0' : ''}
-                        {timeLeft % 60}
+                        Time Left: {Math.floor(timeLeft/60)}:
+                        {timeLeft%60 < 10 ? '0' : ''}{timeLeft%60}
                     </div>
                     <button
-                        onClick={() => {
-                            const confirmed = window.confirm("Are you sure you want to submit the test?");
-                            if (confirmed) handleTestSubmitAndRedirect();
-                        }}
+                        onClick={() =>
+                            window.confirm("Are you sure you want to submit the test?") &&
+                            handleTestSubmitAndRedirect()
+                        }
                         className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
                     >
                         Submit Test
@@ -159,9 +144,10 @@ const App = () => {
                 </div>
             </header>
 
-            <main className="flex flex-1 relative">
+            <main className="flex flex-1 relative overflow-hidden">
+                {/* TASKS PANEL */}
                 {currentPanel === "task" && currentTask && (
-                    <div className="w-1/4 border-r border-gray-300 transition-all duration-300">
+                    <div className="absolute left-0 top-0 h-full w-1/4 border-r border-gray-300 transition-transform duration-300">
                         <TestTasksPanel
                             task={currentTask}
                             currentTaskIndex={currentTaskIndex}
@@ -171,42 +157,55 @@ const App = () => {
                     </div>
                 )}
 
-                <div className={`${editorWidthClass} transition-all duration-300`}>
+                {/* CODE EDITOR */}
+                <div
+                    className={`transition-all duration-300 ${
+                        currentPanel === "task"
+                            ? "w-3/4 ml-[25%]"
+                            : currentPanel === "chat"
+                                ? "w-3/4 mr-[25%]"
+                                : "w-full"
+                    }`}
+                >
                     <CodeEditor />
                 </div>
 
-                {isChatEnabled && session && currentExerciseId && (
-                    <div className={`${currentPanel === "chat" ? "block" : "hidden"} w-1/4 border-l border-gray-300 transition-all duration-300`}>
-                        <ChatPanel sessionId={session.sessionId} currentExerciseId={currentExerciseId} />
+                {/* CHAT PANEL */}
+                {isChatEnabled && session && currentExerciseId && currentPanel === "chat" && (
+                    <div className="absolute right-0 top-0 h-full w-1/4 border-l border-gray-300 transition-transform duration-300 overflow-hidden">
+                        <ChatPanel
+                            sessionId={session.sessionId}
+                            currentExerciseId={currentExerciseId}
+                        />
                     </div>
                 )}
 
-                {/* Tasks toggle */}
+                {/* TASKS TOGGLE BUTTON */}
                 <div
-                    className={`absolute top-1/2 transform -translate-y-1/2 z-20 ${currentPanel === "task" ? "left-[25%]" : "left-0"}`}
+                    className={`absolute top-1/2 transform -translate-y-1/2 z-20 ${
+                        currentPanel === "task" ? "left-[25%]" : "left-0"
+                    }`}
                 >
                     <button
                         onClick={() => togglePanel("task")}
                         className="flex items-center bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-r focus:outline-none"
                     >
-                        {currentPanel === "task"
-                            ? <span>&lt;</span>
-                            : <><span>Tasks</span><span className="ml-2">&gt;</span></>
-                        }
+                        {currentPanel === "task" ? "<" : "Tasks >"}
                     </button>
                 </div>
 
-                {/* Chat toggle */}
+                {/* CHAT TOGGLE BUTTON */}
                 {isChatEnabled && (
-                    <div className="absolute top-1/2 right-0 transform -translate-y-1/2 z-20">
+                    <div
+                        className={`absolute top-1/2 transform -translate-y-1/2 z-20 ${
+                            currentPanel === "chat" ? "right-[25%]" : "right-0"
+                        }`}
+                    >
                         <button
                             onClick={() => togglePanel("chat")}
                             className="flex items-center bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-l focus:outline-none"
                         >
-                            {currentPanel === "chat"
-                                ? <span>&gt;</span>
-                                : <><span className="mr-2">&lt;</span><span>ChatGPT</span></>
-                            }
+                            {currentPanel === "chat" ? ">" : "< ChatGPT"}
                         </button>
                     </div>
                 )}
@@ -217,7 +216,6 @@ const App = () => {
             </footer>
         </div>
     );
-
 };
 
 export default App;
