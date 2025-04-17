@@ -42,12 +42,15 @@ const App = () => {
     useEffect(() => {
         if (!hasStarted || testSubmitted) return;
         if (timeLeft <= 0) {
-            handleTestSubmitAndRedirect();
+            (async () => {
+                await handleTestSubmitAndRedirect();
+            })();
             return;
         }
         const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
         return () => clearInterval(timer);
     }, [timeLeft, hasStarted, testSubmitted]);
+
 
     useEffect(() => {
         if (hasStarted && orderedTasks.length > 0 && session) {
@@ -78,7 +81,7 @@ const App = () => {
             console.error("Error completing exercise:", error);
         }
         if (isLast) {
-            handleTestSubmitAndRedirect();
+            await handleTestSubmitAndRedirect();
         } else {
             setCurrentTaskIndex(idx => idx + 1);
             setCurrentPanel("task");
@@ -117,7 +120,6 @@ const App = () => {
 
     const currentTask = orderedTasks[currentTaskIndex];
     const isChatEnabled = currentTask?.isAIEnabled;
-    const editorWidthClass = currentPanel ? "w-3/4" : "w-full";
 
     if (!hasStarted) {
         return <IntroScreen onStart={data => { setSession(data); setHasStarted(true); }} />;
@@ -133,21 +135,24 @@ const App = () => {
                         {timeLeft%60 < 10 ? '0' : ''}{timeLeft%60}
                     </div>
                     <button
-                        onClick={() =>
-                            window.confirm("Are you sure you want to submit the test?") &&
-                            handleTestSubmitAndRedirect()
-                        }
+                        onClick={async () => {
+                            if (window.confirm("Are you sure you want to submit the test?")) {
+                                await handleTestSubmitAndRedirect();
+                            }
+                        }}
                         className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
                     >
                         Submit Test
                     </button>
+
                 </div>
             </header>
 
             <main className="flex flex-1 relative overflow-hidden">
                 {/* TASKS PANEL */}
                 {currentPanel === "task" && currentTask && (
-                    <div className="absolute left-0 top-0 h-full w-1/4 border-r border-gray-300 transition-transform duration-300">
+                    <div
+                        className="absolute left-0 top-0 h-full w-1/4 border-r border-gray-300 transition-transform duration-300">
                         <TestTasksPanel
                             task={currentTask}
                             currentTaskIndex={currentTaskIndex}
@@ -171,14 +176,18 @@ const App = () => {
                 </div>
 
                 {/* CHAT PANEL */}
-                {isChatEnabled && session && currentExerciseId && currentPanel === "chat" && (
-                    <div className="absolute right-0 top-0 h-full w-1/4 border-l border-gray-300 transition-transform duration-300 overflow-hidden">
+                {isChatEnabled && session && currentExerciseId && (
+                    <div
+                        className={`absolute right-0 top-0 h-full w-1/4 border-l border-gray-300 transition-transform duration-300 overflow-hidden
+                          ${currentPanel === "chat" ? "translate-x-0" : "translate-x-full"}`}
+                    >
                         <ChatPanel
                             sessionId={session.sessionId}
                             currentExerciseId={currentExerciseId}
                         />
                     </div>
                 )}
+
 
                 {/* TASKS TOGGLE BUTTON */}
                 <div

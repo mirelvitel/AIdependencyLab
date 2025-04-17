@@ -24,7 +24,8 @@ public class Interaction {
     @Enumerated(EnumType.STRING)
     private InteractionType actionType;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String details;
 
     public Interaction() {

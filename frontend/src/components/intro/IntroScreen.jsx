@@ -47,7 +47,7 @@ const IntroScreen = ({ onStart }) => {
                         <li>Half of them will be AI-assisted, half without AI.</li>
                         <li>Your code submissions are logged for analysis.</li>
                         <li>Please read each task carefully and follow the instructions.</li>
-                        <li>You can use the built-in AI chat for guidance on AI-assisted tasks.</li>
+                        <li>You can use the built-in AI chat for help on AI-assisted tasks.</li>
                     </ul>
                     <p>
                         When you are ready, please fill out the form on the right and click <strong>Start</strong> to begin. Good luck!

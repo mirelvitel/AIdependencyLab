@@ -4,9 +4,11 @@ import org.example.backend.entity.Session;
 import org.example.backend.entity.User;
 import org.example.backend.persistence.SessionRepository;
 import org.example.backend.persistence.UserRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -44,5 +46,12 @@ public class SessionService {
             sessionRepository.save(session);
         }
         return sessionOpt;
+    }
+
+    @Scheduled(cron = "0 * * * * *")
+    public void deleteStaleSessions() {
+        LocalDateTime cutoff = LocalDateTime.now().minusMinutes(60);
+        List<Session> stale = sessionRepository.findByEndTimeIsNullAndStartTimeBefore(cutoff);
+        sessionRepository.deleteAll(stale);
     }
 }
