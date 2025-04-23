@@ -33,7 +33,5 @@ public class Exercise {
     private String completionTime;
     private Boolean success;
 
-    public Exercise() {
-
-    }
+    public Exercise() {}
 }

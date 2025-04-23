@@ -1,5 +1,6 @@
 package org.example.backend.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.backend.entity.Exercise;
 import org.example.backend.entity.ExerciseComplexity;
 import org.example.backend.entity.Session;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@Slf4j
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api")
@@ -38,11 +40,12 @@ public class CodeRunnerController {
 
     @PostMapping("/run")
     public ResponseEntity<Map<String, Object>> runCode(@RequestBody Map<String, String> payload) {
+        log.info("🔍 /api/run payload: {}", payload);
         String language = payload.get("language");
-        String code = payload.get("code");
-
-        Map<String, Object> jdoodleResponse = codeRunnerService.runCode(language, code);
-        return ResponseEntity.ok(jdoodleResponse);
+        String code     = payload.get("code");
+        Long   taskId   = Long.valueOf(payload.get("taskId"));
+        Map<String, Object> resp = codeRunnerService.runCode(language, code, taskId);
+        return ResponseEntity.ok(resp);
     }
 
     @PostMapping("/exercise/start")

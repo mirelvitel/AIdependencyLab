@@ -2,6 +2,7 @@ package org.example.backend.service;
 
 import org.example.backend.entity.Session;
 import org.example.backend.entity.User;
+import org.example.backend.persistence.ExerciseRepository;
 import org.example.backend.persistence.SessionRepository;
 import org.example.backend.persistence.UserRepository;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,10 +17,14 @@ public class SessionService {
 
     private final UserRepository userRepository;
     private final SessionRepository sessionRepository;
+    private final ExerciseRepository exerciseRepository;
 
-    public SessionService(UserRepository userRepository, SessionRepository sessionRepository) {
+    public SessionService(UserRepository userRepository,
+                          SessionRepository sessionRepository,
+                          ExerciseRepository exerciseRepository) {
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
+        this.exerciseRepository = exerciseRepository;
     }
 
     public Session startSession(String yearOfStudy, String codingExperience) {
@@ -52,6 +57,9 @@ public class SessionService {
     public void deleteStaleSessions() {
         LocalDateTime cutoff = LocalDateTime.now().minusMinutes(60);
         List<Session> stale = sessionRepository.findByEndTimeIsNullAndStartTimeBefore(cutoff);
-        sessionRepository.deleteAll(stale);
+        for (Session session : stale) {
+            exerciseRepository.deleteAll(exerciseRepository.findBySession(session));
+            sessionRepository.delete(session);
+        }
     }
 }

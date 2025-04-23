@@ -163,17 +163,20 @@ const App = () => {
                 )}
 
                 {/* CODE EDITOR */}
-                <div
-                    className={`transition-all duration-300 ${
-                        currentPanel === "task"
-                            ? "w-3/4 ml-[25%]"
-                            : currentPanel === "chat"
-                                ? "w-3/4 mr-[25%]"
-                                : "w-full"
-                    }`}
-                >
-                    <CodeEditor />
+                <div className={`transition-all duration-300 ${
+                    currentPanel === "task"
+                        ? "w-3/4 ml-[25%]"
+                        : currentPanel === "chat"
+                            ? "w-3/4 mr-[25%]"
+                            : "w-full"
+                }`}>
+                    {currentTask ? (
+                        <CodeEditor task={currentTask} />
+                    ) : (
+                        <div className="p-4 text-gray-600">Loading task…</div>
+                    )}
                 </div>
+
 
                 {/* CHAT PANEL */}
                 {isChatEnabled && session && currentExerciseId && (
