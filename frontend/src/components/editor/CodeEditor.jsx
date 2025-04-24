@@ -1,11 +1,9 @@
-// src/components/editor/CodeEditor.jsx
-
 import React, { useState, useEffect } from 'react';
 import { Editor } from '@monaco-editor/react';
 import axios from 'axios';
-import SKELETONS, {TASK_FN_MAP} from "../skeletons";
+import SKELETONS, { TASK_FN_MAP } from "../skeletons";
 
-const CodeEditor = ({ task }) => {
+const CodeEditor = ({ task, exerciseId }) => {
     const fnKey = TASK_FN_MAP[task.title];
     const [code, setCode] = useState('');
     const [output, setOutput] = useState('');
@@ -26,8 +24,10 @@ const CodeEditor = ({ task }) => {
             const { data } = await axios.post('/api/run', {
                 language: 'java',
                 code,
-                taskId: task.taskId
+                taskId: task.taskId,
+                exerciseId: exerciseId
             });
+
             if (data.syntaxError) {
                 setOutput(data.syntaxError);
             } else {
