@@ -25,12 +25,10 @@ public class SessionController {
 
     @PostMapping("/start-session")
     public ResponseEntity<Session> startSession(@RequestBody Map<String, String> payload) {
-        String firstName = payload.get("firstName");
-        String lastName = payload.get("lastName");
         String yearOfStudy = payload.get("yearOfStudy");
         String codingExperience = payload.get("codingExperience");
 
-        Session session = sessionService.startSession(firstName, lastName, yearOfStudy, codingExperience);
+        Session session = sessionService.startSession(yearOfStudy, codingExperience);
         return ResponseEntity.ok(session);
     }
 
@@ -39,9 +37,6 @@ public class SessionController {
         Long sessionId = Long.valueOf(payload.get("sessionId"));
         Optional<Session> sessionOpt = sessionService.endSession(sessionId);
 
-        if (sessionOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok(sessionOpt.get());
+        return sessionOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }
 }

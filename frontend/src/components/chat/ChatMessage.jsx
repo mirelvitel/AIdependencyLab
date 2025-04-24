@@ -7,7 +7,7 @@ const ChatMessage = ({ sender, text }) => {
 
     return (
         <div className={`mb-2 ${alignment}`}>
-            <div className={`inline-block p-2 rounded ${bgColor}`}>
+            <div className={`inline-block p-2 rounded ${bgColor} whitespace-pre-wrap break-words max-w-full`}>
                 <FormattedMessage text={text} />
             </div>
         </div>

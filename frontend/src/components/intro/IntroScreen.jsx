@@ -3,8 +3,6 @@ import axios from 'axios';
 
 const IntroScreen = ({ onStart }) => {
     const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
         yearOfStudy: '',
         codingExperience: ''
     });
@@ -17,7 +15,7 @@ const IntroScreen = ({ onStart }) => {
     };
 
     const handleStart = async () => {
-        if (!formData.firstName || !formData.lastName || !formData.yearOfStudy || !formData.codingExperience) {
+        if (!formData.yearOfStudy || !formData.codingExperience) {
             alert("Please fill in all fields.");
             return;
         }
@@ -49,7 +47,7 @@ const IntroScreen = ({ onStart }) => {
                         <li>Half of them will be AI-assisted, half without AI.</li>
                         <li>Your code submissions are logged for analysis.</li>
                         <li>Please read each task carefully and follow the instructions.</li>
-                        <li>You can use the built-in AI chat for guidance on AI-assisted tasks.</li>
+                        <li>You can use the built-in AI chat for help on AI-assisted tasks.</li>
                     </ul>
                     <p>
                         When you are ready, please fill out the form on the right and click <strong>Start</strong> to begin. Good luck!
@@ -59,18 +57,6 @@ const IntroScreen = ({ onStart }) => {
                 <div>
                     <h3 className="text-xl font-semibold mb-4">User Information</h3>
                     <form className="space-y-4">
-                        <div>
-                            <label htmlFor="firstName" className="block font-medium mb-1">First Name:</label>
-                            <input id="firstName" name="firstName" type="text" placeholder="Enter your first name"
-                                   value={formData.firstName} onChange={handleChange}
-                                   className="border border-gray-300 rounded p-2 w-full"/>
-                        </div>
-                        <div>
-                            <label htmlFor="lastName" className="block font-medium mb-1">Last Name:</label>
-                            <input id="lastName" name="lastName" type="text" placeholder="Enter your last name"
-                                   value={formData.lastName} onChange={handleChange}
-                                   className="border border-gray-300 rounded p-2 w-full"/>
-                        </div>
                         <div>
                             <label htmlFor="yearOfStudy" className="block font-medium mb-1">Year of Study:</label>
                             <select id="yearOfStudy" name="yearOfStudy" value={formData.yearOfStudy}
