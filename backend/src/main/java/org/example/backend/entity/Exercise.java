@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Setter
 @Getter
 @Builder
@@ -27,6 +29,9 @@ public class Exercise {
     @ManyToOne
     @JoinColumn(name = "task_id")
     private Task task;
+
+    @Column(name = "started_at", nullable = false)
+    private LocalDateTime startedAt;
 
     private Boolean isAiEnabled;
     private Boolean completed;

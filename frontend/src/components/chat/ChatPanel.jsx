@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// src/components/chat/ChatPanel.jsx
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import ChatMessage from './ChatMessage';
 
@@ -9,6 +10,7 @@ const ChatPanel = ({ sessionId, currentExerciseId }) => {
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [selectedAction, setSelectedAction] = useState(null);
+    const textareaRef = useRef(null);
 
     const actionTypes = [
         { label: "Code Generation", value: "AI_CODE_GENERATION" },
@@ -32,7 +34,6 @@ const ChatPanel = ({ sessionId, currentExerciseId }) => {
 
     const sendMessage = async () => {
         if (!input.trim() || !selectedAction) return;
-
         const userMessage = { sender: 'user', text: input };
         setMessages(prev => [...prev, userMessage]);
         await logInteraction(selectedAction, input);
@@ -64,12 +65,20 @@ const ChatPanel = ({ sessionId, currentExerciseId }) => {
         }
     };
 
+    useEffect(() => {
+        const ta = textareaRef.current;
+        if (ta) {
+            ta.style.height = 'auto';
+            ta.style.height = `${ta.scrollHeight}px`;
+        }
+    }, [input]);
+
     return (
         <div className="relative flex flex-col h-full bg-white p-2 border-l border-gray-300 overflow-hidden text-sm">
             <div className="flex-1 overflow-y-auto mb-2 break-words">
-                {messages.map((msg, index) => (
+                {messages.map((msg, idx) => (
                     <ChatMessage
-                        key={index}
+                        key={idx}
                         sender={msg.sender}
                         text={msg.text}
                         className="whitespace-pre-wrap break-words"
@@ -100,12 +109,19 @@ const ChatPanel = ({ sessionId, currentExerciseId }) => {
             </div>
 
             <div className="flex">
-                <input
-                    type="text"
-                    className="flex-1 p-2 border border-gray-300 rounded-l text-sm"
+                <textarea
+                    ref={textareaRef}
+                    rows={1}
+                    className="flex-1 p-2 border border-gray-300 rounded-l text-sm resize-none overflow-hidden"
+                    style={{ maxHeight: '20rem' }}
                     value={input}
                     onChange={e => setInput(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') sendMessage(); }}
+                    onKeyDown={e => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendMessage();
+                        }
+                    }}
                     placeholder="Type your message..."
                     disabled={!selectedAction}
                 />

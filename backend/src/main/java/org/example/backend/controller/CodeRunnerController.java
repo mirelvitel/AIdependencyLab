@@ -12,6 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +30,7 @@ public class CodeRunnerController {
     private final SessionRepository sessionRepository;
     private final TaskRepository taskRepository;
     private final InteractionRepository interactionRepository;
+    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     @Autowired
     public CodeRunnerController(CodeRunnerService codeRunnerService,
@@ -99,6 +104,8 @@ public class CodeRunnerController {
                 exercise.setComplexity(ExerciseComplexity.EASY);
             }
             exercise.setCompleted(false);
+            exercise.setSuccess(false);
+            exercise.setStartedAt(LocalDateTime.now());
 
             exercise = exerciseRepository.save(exercise);
             return ResponseEntity.ok(Map.of("exerciseId", exercise.getExerciseId()));
@@ -117,15 +124,10 @@ public class CodeRunnerController {
             Exercise exercise = exerciseRepository.findById(exerciseId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid exercise"));
 
-            if (payload.containsKey("completionTime")) {
-                int seconds = Integer.parseInt(payload.get("completionTime"));
-                String formatted = String.format("%02d:%02d:%02d",
-                        seconds / 3600,
-                        (seconds % 3600) / 60,
-                        seconds % 60
-                );
-                exercise.setCompletionTime(formatted);
-            }
+            long secs = Duration.between(exercise.getStartedAt(), LocalDateTime.now()).getSeconds();
+            String formatted = LocalTime.ofSecondOfDay(secs).format(TIME_FMT);
+            exercise.setCompletionTime(formatted);
+            exercise.setCompleted(true);
 
             exercise.setCompleted(true);
 
