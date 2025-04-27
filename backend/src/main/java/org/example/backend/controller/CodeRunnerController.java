@@ -47,7 +47,6 @@ public class CodeRunnerController {
 
     @PostMapping("/run")
     public ResponseEntity<Map<String, Object>> runCode(@RequestBody Map<String, String> payload) {
-        log.info("🔍 /api/run payload: {}", payload);
         String language = payload.get("language");
         String code     = payload.get("code");
         Long   taskId   = Long.valueOf(payload.get("taskId"));
@@ -69,7 +68,7 @@ public class CodeRunnerController {
                 .count();
         interaction.setPassedCount(passed);
         interaction.setTotalCount(total);
-        interaction.setDetails("-");
+        interaction.setDetails(code);
 
         interactionRepository.save(interaction);
 

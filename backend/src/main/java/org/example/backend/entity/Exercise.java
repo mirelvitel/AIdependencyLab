@@ -1,5 +1,7 @@
 package org.example.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,8 +12,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Setter
 @Getter
+@Setter
 @Builder
 @Entity
 @Table(name = "exercise")
@@ -23,6 +25,7 @@ public class Exercise {
 
     @ManyToOne
     @JoinColumn(name = "session_id", nullable = false)
+    @JsonBackReference
     private Session session;
 
     @Enumerated(EnumType.STRING)
@@ -45,6 +48,7 @@ public class Exercise {
             cascade = CascadeType.REMOVE,
             orphanRemoval = true
     )
+    @JsonManagedReference
     private List<Interaction> interactions = new ArrayList<>();
 
     public Exercise() {}

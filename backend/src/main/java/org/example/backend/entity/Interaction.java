@@ -1,5 +1,6 @@
 package org.example.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +18,7 @@ public class Interaction {
 
     @ManyToOne
     @JoinColumn(name = "exercise_id", nullable = false)
+    @JsonBackReference
     private Exercise exercise;
 
     private LocalDateTime timestamp;
@@ -24,7 +26,6 @@ public class Interaction {
     @Enumerated(EnumType.STRING)
     private InteractionType actionType;
 
-    @Lob
     @Column(columnDefinition = "TEXT", nullable = false)
     private String details;
 

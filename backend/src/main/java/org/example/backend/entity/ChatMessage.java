@@ -21,7 +21,7 @@ public class ChatMessage {
 
     private String role;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
     private LocalDateTime createdAt = LocalDateTime.now();
