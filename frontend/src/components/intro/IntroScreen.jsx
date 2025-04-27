@@ -43,14 +43,20 @@ const IntroScreen = ({ onStart }) => {
                         with and without AI assistance. Please read the following instructions:
                     </p>
                     <ul className="list-disc list-inside mb-4">
-                        <li>You will have 10 exercises to complete.</li>
+                        <li>You will have 8 exercises to complete.</li>
                         <li>Half of them will be AI-assisted, half without AI.</li>
                         <li>Your code submissions are logged for analysis.</li>
                         <li>Please read each task carefully and follow the instructions.</li>
                         <li>You can use the built-in AI chat for help on AI-assisted tasks.</li>
+                        <li><strong>Please do not use any external AI tools (like ChatGPT, Copilot, etc.) on tasks where
+                            AI is not allowed.</strong> You may use any other resources like documentation, Stack
+                            Overflow, etc.
+                        </li>
                     </ul>
+
                     <p>
-                        When you are ready, please fill out the form on the right and click <strong>Start</strong> to begin. Good luck!
+                        When you are ready, please fill out the form on the right and click <strong>Start</strong> to
+                        begin. Good luck!
                     </p>
                 </div>
                 {/* Right Column: User Info Form */}

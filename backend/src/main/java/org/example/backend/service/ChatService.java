@@ -48,7 +48,7 @@ public class ChatService {
         }
 
         Map<String, Object> requestPayload = new HashMap<>();
-        requestPayload.put("model", "gpt-4");
+        requestPayload.put("model", "gpt-4o");
         requestPayload.put("messages", messagesList);
 
         HttpHeaders headers = new HttpHeaders();
