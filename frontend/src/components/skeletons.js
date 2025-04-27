@@ -54,15 +54,14 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        if (!sc.hasNextLine()) { sc.close(); return; }
-        String str = sc.nextLine();
-        System.out.println(isPalindrome(str));
+        String str = sc.hasNextLine() ? sc.nextLine() : "";
         sc.close();
+        System.out.println(isPalindrome(str));
     }
 
     static boolean isPalindrome(String str) {
         // TODO: implement this method only
-        return false;
+        return true;
     }
 }`,
 
@@ -83,7 +82,6 @@ public class Main {
                     .toArray();
 
         int[] distinct = removeDuplicates(nums);
-        // remove spaces from array string
         System.out.println(Arrays.toString(distinct).replace(" ", ""));
         sc.close();
     }
@@ -101,14 +99,14 @@ public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         if (!sc.hasNextLine()) { sc.close(); return; }
-        String line = sc.nextLine().trim(); // e.g. "2,3"
+        String line = sc.nextLine().trim();
         sc.close();
 
         String[] parts = line.split(",");
         if (parts.length < 2) return;
         int a = Integer.parseInt(parts[0].trim());
         int b = Integer.parseInt(parts[1].trim());
-        System.out.println("Output: " + addTwoNumbers(a, b));
+        System.out.println(addTwoNumbers(a, b));
     }
 
     static int addTwoNumbers(int a, int b) {
@@ -160,7 +158,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         if (!sc.hasNextLine()) { sc.close(); return; }
-        String line = sc.nextLine().trim(); // e.g. "[3,1,5,2]"
+        String line = sc.nextLine().trim();
         sc.close();
         line = line.substring(1, line.length() - 1);
         int[] nums = line.isEmpty()

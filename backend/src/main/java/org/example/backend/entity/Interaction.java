@@ -28,7 +28,15 @@ public class Interaction {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String details;
 
+    @Column(name = "passed_count", nullable = false)
+    private Integer passedCount;
+
+    @Column(name = "total_count", nullable = false)
+    private Integer totalCount;
+
     public Interaction() {
         this.timestamp = LocalDateTime.now();
+        this.passedCount = 0;
+        this.totalCount = 0;
     }
 }

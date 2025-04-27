@@ -171,12 +171,14 @@ const App = () => {
                             : "w-full"
                 }`}>
                     {currentTask ? (
-                        <CodeEditor task={currentTask} />
+                        <CodeEditor
+                            task={currentTask}
+                            exerciseId={currentExerciseId}
+                        />
                     ) : (
                         <div className="p-4 text-gray-600">Loading task…</div>
                     )}
                 </div>
-
 
                 {/* CHAT PANEL */}
                 {isChatEnabled && session && currentExerciseId && (

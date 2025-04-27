@@ -6,6 +6,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Setter
 @Getter
 @Builder
@@ -28,10 +32,20 @@ public class Exercise {
     @JoinColumn(name = "task_id")
     private Task task;
 
+    @Column(name = "started_at", nullable = false)
+    private LocalDateTime startedAt;
+
     private Boolean isAiEnabled;
     private Boolean completed;
     private String completionTime;
     private Boolean success;
+
+    @OneToMany(
+            mappedBy = "exercise",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
+    private List<Interaction> interactions = new ArrayList<>();
 
     public Exercise() {}
 }

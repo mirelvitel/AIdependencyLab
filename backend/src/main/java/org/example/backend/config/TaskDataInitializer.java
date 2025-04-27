@@ -57,7 +57,7 @@ public class TaskDataInitializer implements CommandLineRunner {
                 new Task(
                         "Task #1 (No AI) - Add Two Numbers",
                         "Implement a function addTwoNumbers(a, b) that returns the sum of a and b.",
-                        "Input: 2,3 → Output: 5|Input: 0,0 → Output: 0|Input: -1,5 → Output: 4",
+                        "Input: 2,3 → 5|Input: 0,0 → 0|Input: -1,5 → 4",
                         "very_easy",
                         false
                 ),
