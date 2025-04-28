@@ -48,8 +48,8 @@ const IntroScreen = ({ onStart }) => {
                         <li>Your code submissions are logged for analysis.</li>
                         <li>Please read each task carefully and follow the instructions.</li>
                         <li>You can use the built-in AI chat for help on AI-assisted tasks.</li>
-                        <li><strong>Please do not use any external AI tools (like ChatGPT, Copilot, etc.) on tasks where
-                            AI is not allowed.</strong> You may use any other resources like documentation, Stack
+                        <li><strong>Please do not use any external AI tools (like ChatGPT, Copilot, etc.).
+                        </strong> You may use any other resources like documentation, Stack
                             Overflow, etc.
                         </li>
                     </ul>
