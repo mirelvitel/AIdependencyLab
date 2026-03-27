@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+
+if (process.env.REACT_APP_API_URL) {
+    axios.defaults.baseURL = process.env.REACT_APP_API_URL;
+}
 import './index.css';
 import CodeEditor from './components/editor/CodeEditor';
 import ChatPanel from './components/chat/ChatPanel';
