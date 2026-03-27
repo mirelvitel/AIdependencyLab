@@ -20,11 +20,6 @@ public class CodeRunnerService {
     private final RestTemplate   rest   = new RestTemplate();
     private final ObjectMapper   mapper = new ObjectMapper();
 
-    @Value("${JDOODLE_CLIENT_ID}")
-    private String jdClientId;
-    @Value("${JDOODLE_CLIENT_SECRET}")
-    private String jdClientSecret;
-
     @Value("${JUDGE0_API_URL}")
     private String judge0Url;
     @Value("${JUDGE0_API_KEY}")
@@ -42,30 +37,6 @@ public class CodeRunnerService {
     }
 
     public Map<String,Object> runCode(String language, String code, Long taskId) {
-        String jdLang = mapToJDoodleLang(language);
-        Map<String,Object> jdReq = Map.of(
-                "script",       code,
-                "language",     jdLang,
-                "versionIndex", "0",
-                "clientId",     jdClientId,
-                "clientSecret", jdClientSecret
-        );
-        @SuppressWarnings("unchecked")
-        Map<String,Object> jdRes = rest.postForObject(
-                "https://api.jdoodle.com/v1/execute",
-                jdReq,
-                Map.class
-        );
-        String jdOutput = Objects.toString(jdRes.get("output"), "");
-        if (jdOutput.toLowerCase().contains("error") ||
-                jdOutput.toLowerCase().contains("exception")) {
-            Map<String,Object> errorMap = new HashMap<>();
-            errorMap.put("syntaxError", jdOutput);
-            errorMap.put("testResults", List.of());
-            errorMap.put("allPassed",   false);
-            return errorMap;
-        }
-
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid taskId"));
         String[] parts = task.getTestCases().split("\\|");
@@ -93,8 +64,8 @@ public class CodeRunnerService {
         hdr.set("X-RapidAPI-Key",  judge0Key);
         hdr.set("X-RapidAPI-Host", base.getHost());
 
-        List<Map<String,Object>> results = new ArrayList<>();
         int langId = LANG_ID.getOrDefault(language, 62);
+        List<Map<String,Object>> results = new ArrayList<>();
 
         for (var tc : cases) {
             Map<String,Object> bodyMap = Map.of(
@@ -112,19 +83,28 @@ public class CodeRunnerService {
 
             HttpEntity<String> req = new HttpEntity<>(jsonBody, hdr);
             ResponseEntity<String> rawResp = rest.postForEntity(submissionsUrl, req, String.class);
-            String rawBody = rawResp.getBody();
 
             Map<String,Object> jr;
             try {
-                jr = mapper.readValue(rawBody, new TypeReference<Map<String,Object>>() {});
+                jr = mapper.readValue(rawResp.getBody(), new TypeReference<Map<String,Object>>() {});
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Failed to parse Judge0 response", e);
             }
 
-            String out   = Objects.toString(jr.get("stdout"), "");
-            String err   = Objects.toString(jr.get("stderr"), "");
-            boolean pass = out.strip().equals(tc.get("expected"));
-            String actual = pass ? out : (err.isBlank() ? out : err);
+            // Check for compilation error on the first submission — all cases will fail the same way
+            String compileOutput = Objects.toString(jr.get("compile_output"), "").strip();
+            if (!compileOutput.isEmpty()) {
+                Map<String,Object> errorMap = new HashMap<>();
+                errorMap.put("syntaxError", compileOutput);
+                errorMap.put("testResults", List.of());
+                errorMap.put("allPassed",   false);
+                return errorMap;
+            }
+
+            String out   = Objects.toString(jr.get("stdout"), "").strip();
+            String err   = Objects.toString(jr.get("stderr"), "").strip();
+            boolean pass = out.equals(tc.get("expected"));
+            String actual = pass ? out : (err.isEmpty() ? out : err);
 
             results.add(Map.of(
                     "stdin",    tc.get("stdin"),
@@ -142,14 +122,5 @@ public class CodeRunnerService {
         finalMap.put("testResults", results);
         finalMap.put("allPassed",   allPassed);
         return finalMap;
-    }
-
-    private String mapToJDoodleLang(String lang) {
-        return switch (lang) {
-            case "python" -> "python3";
-            case "csharp" -> "csharp";
-            case "cpp"    -> "cpp17";
-            default       -> "java";
-        };
     }
 }
