@@ -90,7 +90,7 @@ pgAdmin credentials: `admin@admin.com` / `admin`
 
 ## Environment Variables
 
-Create `frontend/.env` (never commit this file):
+Create `frontend/.env`:
 
 ```env
 OPENAI_API_KEY=
