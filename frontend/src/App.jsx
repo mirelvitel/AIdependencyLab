@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-
-if (process.env.REACT_APP_API_URL) {
-    axios.defaults.baseURL = process.env.REACT_APP_API_URL;
-}
 import './index.css';
 import CodeEditor from './components/editor/CodeEditor';
 import ChatPanel from './components/chat/ChatPanel';
 import IntroScreen from './components/intro/IntroScreen';
 import TestTasksPanel from './components/test/TestTasksPanel';
 import SurveyForm from './components/survey/SurveyForm';
+
+if (process.env.REACT_APP_API_URL) {
+    axios.defaults.baseURL = process.env.REACT_APP_API_URL;
+}
 
 const App = () => {
     const [hasStarted, setHasStarted] = useState(false);
