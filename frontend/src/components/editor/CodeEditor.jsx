@@ -46,7 +46,8 @@ const CodeEditor = ({ task, exerciseId }) => {
                 setAllPassed(data.allPassed);
             }
         } catch (err) {
-            setSyntaxError(err.response?.data || err.message);
+            const data = err.response?.data;
+            setSyntaxError(typeof data === 'string' ? data : data?.message || err.message);
         } finally {
             setLoading(false);
         }

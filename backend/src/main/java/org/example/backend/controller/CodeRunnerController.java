@@ -10,7 +10,10 @@ import org.example.backend.service.CodeRunnerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -21,7 +24,6 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api")
 public class CodeRunnerController {
 
@@ -124,10 +126,9 @@ public class CodeRunnerController {
                     .orElseThrow(() -> new IllegalArgumentException("Invalid exercise"));
 
             long secs = Duration.between(exercise.getStartedAt(), LocalDateTime.now()).getSeconds();
-            String formatted = LocalTime.ofSecondOfDay(secs).format(TIME_FMT);
+            long safeSecs = secs % 86400;
+            String formatted = LocalTime.ofSecondOfDay(safeSecs).format(TIME_FMT);
             exercise.setCompletionTime(formatted);
-            exercise.setCompleted(true);
-
             exercise.setCompleted(true);
 
             exerciseRepository.save(exercise);

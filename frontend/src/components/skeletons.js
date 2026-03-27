@@ -1,13 +1,13 @@
 export const TASK_FN_MAP = {
-    "Task #1 (With AI) - Check Even/Odd":           "isEven",
-    "Task #2 (With AI) - Count Vowels in a String": "countVowels",
-    "Task #3 (With AI) - Check Palindrome":       "isPalindrome",
-    "Task #4 (With AI) - Remove Duplicates from Sorted Array": "removeDuplicates",
+    "Task #1 - Check Even/Odd":           "isEven",
+    "Task #2 - Count Vowels in a String": "countVowels",
+    "Task #3 - Check Palindrome":       "isPalindrome",
+    "Task #4 - Remove Duplicates from Sorted Array": "removeDuplicates",
 
-    "Task #1 (No AI) - Add Two Numbers":            "addTwoNumbers",
-    "Task #2 (No AI) - Check Prime":               "isPrime",
-    "Task #3 (No AI) - Reverse a String":           "reverseString",
-    "Task #4 (No AI) - Find Minimum in an Array":   "findMin"
+    "Task #1 - Add Two Numbers":            "addTwoNumbers",
+    "Task #2 - Check Prime":               "isPrime",
+    "Task #3 - Reverse a String":           "reverseString",
+    "Task #4 - Find Minimum in an Array":   "findMin"
 };
 
 const SKELETONS = {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './index.css';
 import CodeEditor from './components/editor/CodeEditor';
@@ -39,6 +39,17 @@ const App = () => {
         }
     }, [hasStarted, allTasks]);
 
+    const handleTestSubmitAndRedirect = useCallback(async () => {
+        if (session?.sessionId) {
+            try {
+                await axios.post('/api/end-session', { sessionId: session.sessionId });
+            } catch (error) {
+                console.error("Error ending session:", error);
+            }
+        }
+        setTestSubmitted(true);
+    }, [session]);
+
     useEffect(() => {
         if (!hasStarted || testSubmitted) return;
         if (timeLeft <= 0) {
@@ -49,13 +60,23 @@ const App = () => {
         }
         const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
         return () => clearInterval(timer);
-    }, [timeLeft, hasStarted, testSubmitted]);
+    }, [timeLeft, hasStarted, testSubmitted, handleTestSubmitAndRedirect]);
 
+
+    useEffect(() => {
+        if (!hasStarted || testSubmitted) return;
+        const handler = e => {
+            e.preventDefault();
+            e.returnValue = '';
+        };
+        window.addEventListener('beforeunload', handler);
+        return () => window.removeEventListener('beforeunload', handler);
+    }, [hasStarted, testSubmitted]);
 
     useEffect(() => {
         if (hasStarted && orderedTasks.length > 0 && session) {
             const currentTask = orderedTasks[currentTaskIndex];
-            const taskId = currentTask.id || currentTask.taskId;
+            const taskId = currentTask.taskId;
             axios.post('/api/exercise/start', {
                 sessionId: session.sessionId,
                 taskId: taskId
@@ -86,17 +107,6 @@ const App = () => {
             setCurrentTaskIndex(idx => idx + 1);
             setCurrentPanel("task");
         }
-    };
-
-    const handleTestSubmitAndRedirect = async () => {
-        if (session?.sessionId) {
-            try {
-                await axios.post('/api/end-session', { sessionId: session.sessionId });
-            } catch (error) {
-                console.error("Error ending session:", error);
-            }
-        }
-        setTestSubmitted(true);
     };
 
     const togglePanel = panel =>
@@ -151,8 +161,7 @@ const App = () => {
             <main className="flex flex-1 relative overflow-hidden">
                 {/* TASKS PANEL */}
                 {currentPanel === "task" && currentTask && (
-                    <div
-                        className="absolute left-0 top-0 h-full w-1/4 border-r border-gray-300 transition-transform duration-300">
+                    <div className="absolute left-0 top-0 h-full w-1/4 border-r border-gray-300">
                         <TestTasksPanel
                             task={currentTask}
                             currentTaskIndex={currentTaskIndex}
@@ -163,13 +172,13 @@ const App = () => {
                 )}
 
                 {/* CODE EDITOR */}
-                <div className={`transition-all duration-300 ${
+                <div className={
                     currentPanel === "task"
                         ? "w-3/4 ml-[25%]"
                         : currentPanel === "chat"
                             ? "w-3/4 mr-[25%]"
                             : "w-full"
-                }`}>
+                }>
                     {currentTask ? (
                         <CodeEditor
                             task={currentTask}
@@ -182,11 +191,9 @@ const App = () => {
 
                 {/* CHAT PANEL */}
                 {isChatEnabled && session && currentExerciseId && (
-                    <div
-                        className={`absolute right-0 top-0 h-full w-1/4 border-l border-gray-300 transition-transform duration-300 overflow-hidden
-                          ${currentPanel === "chat" ? "translate-x-0" : "translate-x-full"}`}
-                    >
+                    <div className={`absolute right-0 top-0 h-full w-1/4 border-l border-gray-300 overflow-hidden ${currentPanel === "chat" ? "" : "hidden"}`}>
                         <ChatPanel
+                            key={currentExerciseId}
                             sessionId={session.sessionId}
                             currentExerciseId={currentExerciseId}
                         />
@@ -225,8 +232,8 @@ const App = () => {
                 )}
             </main>
 
-            <footer className="text-center text-gray-600 py-4">
-                &copy; {new Date().getFullYear()} AIdependencyLab
+            <footer className="bg-gray-700 text-gray-400 text-xs text-center py-2 flex-shrink-0">
+                &copy; {new Date().getFullYear()} AIdependencyLab — Research Platform
             </footer>
         </div>
     );

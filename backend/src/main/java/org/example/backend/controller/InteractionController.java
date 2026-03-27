@@ -9,7 +9,10 @@ import org.example.backend.persistence.InteractionRepository;
 import org.example.backend.persistence.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api")
 public class InteractionController {
 
@@ -58,7 +60,11 @@ public class InteractionController {
             }
             Exercise exercise = exerciseOpt.get();
 
-            String actionTypeString = payload.get("actionType").trim();
+            String rawActionType = payload.get("actionType");
+            if (rawActionType == null || rawActionType.isBlank()) {
+                return ResponseEntity.badRequest().body("actionType is required");
+            }
+            String actionTypeString = rawActionType.trim();
             String details = payload.get("details");
 
             Interaction interaction = new Interaction();

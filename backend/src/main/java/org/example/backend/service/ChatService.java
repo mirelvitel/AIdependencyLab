@@ -17,6 +17,7 @@ public class ChatService {
     @Value("${openai.api-key}")
     private String openaiApiKey;
 
+    private final RestTemplate restTemplate = new RestTemplate();
     private final SessionRepository sessionRepository;
     private final ChatMessageRepository chatMessageRepository;
 
@@ -56,7 +57,6 @@ public class ChatService {
         headers.setBearerAuth(openaiApiKey);
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestPayload, headers);
-        RestTemplate restTemplate = new RestTemplate();
         String openaiUrl = "https://api.openai.com/v1/chat/completions";
 
         ResponseEntity<Map> responseEntity = restTemplate.exchange(openaiUrl, HttpMethod.POST, entity, Map.class);

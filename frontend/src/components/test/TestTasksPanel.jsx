@@ -11,30 +11,70 @@ const TestTasksPanel = ({ task, currentTaskIndex, totalTasks, onSubmit }) => {
     }
 
     return (
-        <div className="h-full p-4 bg-white overflow-y-auto shadow-md rounded-md">
-            <h2 className="text-xl font-bold mb-2">
-                Task {currentTaskIndex + 1} of {totalTasks}
-            </h2>
-            <h3 className="text-lg font-semibold mb-2">{task.title}</h3>
-            <p className="whitespace-pre-line mb-4">{task.description}</p>
+        <div className="h-full flex flex-col bg-white overflow-hidden shadow-md">
 
-            {testCasesArray && testCasesArray.length > 0 && (
-                <div className="bg-gray-200 p-3 mt-4 rounded border border-gray-400">
-                    <h4 className="font-semibold mb-2">Test Cases:</h4>
-                    <ul className="list-disc pl-5 space-y-1">
-                        {testCasesArray.map((tc, i) => (
-                            <li key={i} className="text-sm">{tc}</li>
-                        ))}
-                    </ul>
+            {/* Header */}
+            <div className="bg-gray-700 text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
+                <div>
+                    <p className="text-xs text-gray-400 uppercase tracking-widest">Progress</p>
+                    <p className="text-lg font-bold leading-tight">
+                        Task <span className="text-white">{currentTaskIndex + 1}</span>
+                        <span className="text-gray-400 font-normal"> / {totalTasks}</span>
+                    </p>
                 </div>
-            )}
+                {task.isAIEnabled ? (
+                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-green-500 text-white">
+                        AI Enabled
+                    </span>
+                ) : (
+                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-red-500 text-white">
+                        No AI
+                    </span>
+                )}
+            </div>
 
-            <div className="mt-6">
+            {/* Progress bar */}
+            <div className="h-1 bg-gray-200 flex-shrink-0">
+                <div
+                    className="h-1 bg-gray-500 transition-all duration-300"
+                    style={{ width: `${((currentTaskIndex + 1) / totalTasks) * 100}%` }}
+                />
+            </div>
+
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div>
+                    <h3 className="text-base font-bold text-gray-800">{task.title}</h3>
+                    <p className="mt-2 text-sm text-gray-600 whitespace-pre-line leading-relaxed">
+                        {task.description}
+                    </p>
+                </div>
+
+                {testCasesArray && testCasesArray.length > 0 && (
+                    <div className="rounded-md border border-gray-200 overflow-hidden">
+                        <div className="bg-gray-100 px-3 py-2 border-b border-gray-200">
+                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                Test Cases
+                            </h4>
+                        </div>
+                        <ul className="divide-y divide-gray-100">
+                            {testCasesArray.map((tc, i) => (
+                                <li key={i} className="px-3 py-2 text-sm text-gray-700 font-mono">
+                                    {tc}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex-shrink-0 px-4 py-3 border-t border-gray-200 bg-gray-50">
                 <button
                     onClick={onSubmit}
-                    className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                    className="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded transition-colors duration-150"
                 >
-                    Submit Task
+                    {currentTaskIndex === totalTasks - 1 ? 'Submit Test' : 'Submit Task →'}
                 </button>
             </div>
         </div>

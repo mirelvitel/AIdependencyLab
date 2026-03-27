@@ -1,12 +1,14 @@
-# Use a Maven image with OpenJDK 17 for both building and running the application
-FROM maven:3.8.1-openjdk-17
-
-# Set the working directory inside the container
+# Stage 1: build the JAR
+FROM maven:3.8.1-openjdk-17 AS build
 WORKDIR /app
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+COPY src ./src
+RUN mvn package -DskipTests
 
-# Copy the entire project (pom.xml, src/, etc.) into the container
-COPY . .
-
-# Install dependencies and run the application
-# Skip tests for faster builds in development
-CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.profiles=dev"]
+# Stage 2: run the JAR
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8080
+CMD ["java", "-jar", "app.jar"]

@@ -11,6 +11,7 @@ const ChatPanel = ({ sessionId, currentExerciseId }) => {
     const [loading, setLoading] = useState(false);
     const [selectedAction, setSelectedAction] = useState(null);
     const textareaRef = useRef(null);
+    const messagesEndRef = useRef(null);
 
     const actionTypes = [
         { label: "Code Generation", value: "AI_CODE_GENERATION" },
@@ -73,9 +74,21 @@ const ChatPanel = ({ sessionId, currentExerciseId }) => {
         }
     }, [input]);
 
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
     return (
-        <div className="relative flex flex-col h-full bg-white p-2 border-l border-gray-300 overflow-hidden text-sm">
-            <div className="flex-1 overflow-y-auto mb-2 break-words">
+        <div className="relative flex flex-col h-full bg-white overflow-hidden text-sm">
+
+            {/* Header */}
+            <div className="bg-gray-700 text-white px-4 py-3 flex-shrink-0">
+                <p className="text-xs text-gray-400 uppercase tracking-widest">Assistant</p>
+                <p className="font-bold leading-tight">AI Chat</p>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-1 break-words">
                 {messages.map((msg, idx) => (
                     <ChatMessage
                         key={idx}
@@ -84,79 +97,74 @@ const ChatPanel = ({ sessionId, currentExerciseId }) => {
                         className="whitespace-pre-wrap break-words"
                     />
                 ))}
+                <div ref={messagesEndRef} />
             </div>
 
-            {!selectedAction && (
-                <div className="text-red-600 mb-1 text-xs">
-                    *Please select the type of request you want to make:
+            {/* Input area */}
+            <div className="flex-shrink-0 border-t border-gray-200 bg-gray-50 px-3 pt-2 pb-3 space-y-2">
+                {/* Action type buttons */}
+                <div>
+                    {!selectedAction && (
+                        <p className="text-xs text-red-500 mb-1">Select a request type before sending:</p>
+                    )}
+                    <div className="flex flex-wrap gap-1">
+                        {actionTypes.map(action => (
+                            <button
+                                key={action.value}
+                                onClick={() => setSelectedAction(action.value)}
+                                className={`px-2 py-1 rounded text-xs font-medium border transition-colors duration-100 ${
+                                    selectedAction === action.value
+                                        ? 'bg-gray-700 text-white border-gray-700'
+                                        : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
+                                }`}
+                            >
+                                {action.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-            )}
 
-            <div className="flex items-center space-x-1 mb-1 text-xs">
-                {actionTypes.map(action => (
+                {/* Text input + send */}
+                <div className="flex gap-2 items-end">
+                    <textarea
+                        ref={textareaRef}
+                        rows={1}
+                        className="flex-1 p-2 border border-gray-300 rounded text-sm resize-none overflow-hidden focus:outline-none focus:border-gray-500"
+                        style={{ maxHeight: '8rem', minHeight: '2.25rem' }}
+                        value={input}
+                        onChange={e => setInput(e.target.value)}
+                        onKeyDown={e => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                sendMessage();
+                            }
+                        }}
+                        placeholder={selectedAction ? "Type your message…" : "Select a type first…"}
+                        disabled={!selectedAction}
+                    />
                     <button
-                        key={action.value}
-                        onClick={() => setSelectedAction(action.value)}
-                        className={`px-2 py-1 border rounded ${
-                            selectedAction === action.value
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                        }`}
+                        onClick={sendMessage}
+                        disabled={!selectedAction || !input.trim()}
+                        className="bg-gray-700 hover:bg-gray-800 disabled:opacity-40 text-white px-3 py-2 rounded text-sm font-semibold transition-colors duration-150"
                     >
-                        {action.label}
+                        Send
                     </button>
-                ))}
+                </div>
             </div>
 
-            <div className="flex">
-                <textarea
-                    ref={textareaRef}
-                    rows={1}
-                    className="flex-1 p-2 border border-gray-300 rounded-l text-sm resize-none overflow-hidden"
-                    style={{ maxHeight: '20rem' }}
-                    value={input}
-                    onChange={e => setInput(e.target.value)}
-                    onKeyDown={e => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            sendMessage();
-                        }
-                    }}
-                    placeholder="Type your message..."
-                    disabled={!selectedAction}
-                />
-                <button
-                    onClick={sendMessage}
-                    className="bg-blue-500 text-white p-2 rounded-r text-sm"
-                    disabled={!selectedAction || !input.trim()}
-                >
-                    Send
-                </button>
-            </div>
-
+            {/* Loading overlay */}
             {loading && (
                 <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center z-20 space-y-2">
                     <svg
-                        className="animate-spin h-6 w-6 text-blue-600"
+                        className="animate-spin h-6 w-6 text-gray-600"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
                     >
-                        <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                        />
-                        <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                        />
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                     </svg>
-                    <span className="text-sm text-gray-700">Thinking …</span>
+                    <span className="text-sm text-gray-600">Thinking…</span>
                 </div>
             )}
         </div>

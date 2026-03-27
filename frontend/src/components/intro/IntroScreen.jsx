@@ -39,7 +39,7 @@ const IntroScreen = ({ onStart }) => {
                         Welcome to the AIdependencyLab Test
                     </h2>
                     <p className="mb-4">
-                        This test is designed to assess your ability to solve programming tasks
+                        This test is designed for students to assess their ability to solve programming tasks
                         with and without AI assistance. Please read the following instructions:
                     </p>
                     <ul className="list-disc list-inside mb-4">

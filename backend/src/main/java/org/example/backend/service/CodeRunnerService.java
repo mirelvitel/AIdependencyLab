@@ -72,6 +72,7 @@ public class CodeRunnerService {
         List<Map<String,String>> cases = new ArrayList<>();
         for (String p : parts) {
             String[] kv = p.split("→");
+            if (kv.length < 2) continue;
             cases.add(Map.of(
                     "stdin",    kv[0].replaceFirst(".*?:", "").trim(),
                     "expected", kv[1].trim()
