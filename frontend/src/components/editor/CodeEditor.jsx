@@ -66,17 +66,27 @@ const CodeEditor = ({ task, exerciseId }) => {
                 />
             </div>
 
-            <div className="mt-4 flex gap-4">
+            <div className="mt-4 flex gap-4 items-center">
                 <button
                     onClick={handleRunCode}
-                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+                    className={`flex items-center gap-2 text-white font-bold py-2 px-6 rounded transition-colors ${
+                        loading
+                            ? 'bg-green-400 cursor-not-allowed'
+                            : 'bg-green-500 hover:bg-green-600'
+                    }`}
                     disabled={loading}
                 >
+                    {loading && (
+                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                        </svg>
+                    )}
                     {loading ? 'Running…' : 'Run Code'}
                 </button>
             </div>
 
-            <div className="mt-4 bg-gray-100 p-4 rounded max-h-64 overflow-y-auto">
+            <div className="mt-4 bg-gray-100 p-4 rounded max-h-96 overflow-y-auto">
                 {/* Pass/Fail summary */}
                 {allPassed != null && (
                     <div
